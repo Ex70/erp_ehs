@@ -310,6 +310,19 @@ return [
             'topnav_right' => true,
         ],
 
+        [
+            'text'    => 'Administración',
+            'icon'    => 'fas fa-cogs',
+            'can'     => 'usuarios.ver',
+            'submenu' => [
+                [
+                    'text'  => 'Usuarios',
+                    'url'   => 'usuarios',
+                    'icon'  => 'fas fa-users',
+                    'can'   => 'usuarios.ver',
+                ],
+            ],
+        ],
         // Sidebar items:
         [
             'type' => 'sidebar-menu-search',
