@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PuestoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,13 +21,10 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
 // Jefe de área y administrador
 Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
     Route::resource('puestos', PuestoController::class);
+    Route::resource('usuarios', UsuarioController::class);
 });
 
 // Solo autenticados
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
-});
-
-Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
-    Route::resource('usuarios', UsuarioController::class);
 });

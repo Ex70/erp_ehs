@@ -321,6 +321,12 @@ return [
                     'icon'  => 'fas fa-users',
                     'can'   => 'usuarios.ver',
                 ],
+                [
+                    'text' => 'Puestos',        // <-- agregar
+                    'url'  => 'puestos',
+                    'icon' => 'fas fa-briefcase',
+                    'can'  => 'puestos.ver',
+                ],
             ],
         ],
         // Sidebar items:
