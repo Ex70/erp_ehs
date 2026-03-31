@@ -136,9 +136,24 @@ return [
     'usermenu_enabled' => true,
     'usermenu_header' => false,
     'usermenu_header_class' => 'bg-primary',
-    'usermenu_image' => false,
-    'usermenu_desc' => false,
-    'usermenu_profile_url' => false,
+    'usermenu_image' => true,
+    'usermenu_desc' => '',
+    'usermenu_profile_url' => 'perfil',
+    'user_avatar' => null, // lo controlaremos desde el modelo
+
+    'usermenu_items' => [
+    [
+        'text' => 'Mi perfil',
+        'url'  => 'perfil',
+        'icon' => 'fas fa-user',
+    ],
+    [
+        'text'         => 'Cerrar sesión',
+        'url'          => '#',
+        'icon'         => 'fas fa-sign-out-alt',
+        'onclick'      => "event.preventDefault(); document.getElementById('logout-form').submit();",
+    ],
+],
 
     /*
     |--------------------------------------------------------------------------

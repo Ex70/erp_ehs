@@ -53,4 +53,26 @@ class User extends Authenticatable
     public function puesto(){
         return $this->belongsTo(Puesto::class);
     }
+
+        /**
+     * URL del avatar para AdminLTE
+     */
+    public function adminlte_image(): string
+    {
+        return $this->avatar
+            ? asset('storage/' . $this->avatar)
+            : asset('vendor/adminlte/dist/img/user2-160x160.jpg');
+    }
+
+    public function adminlte_desc(): string
+    {
+        return $this->getRoleNames()->first()
+            ? ucfirst(str_replace('_', ' ', $this->getRoleNames()->first()))
+            : '';
+    }
+
+    public function adminlte_profile_url(): string
+    {
+        return route('perfil.show');
+    }
 }
