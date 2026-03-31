@@ -22,7 +22,8 @@ class UsuarioController extends Controller
     public function create(){
         $puestos = Puesto::where('activo', true)->orderBy('nombre')->get();
         $roles = Role::orderBy('name')->get();
-        return view('usuarios.create', compact('puestos', 'roles'));
+        $usuario = new \App\Models\User(); // instancia vacía, sin guardar
+        return view('usuarios.create', compact('puestos', 'roles','usuario'));
     }
 
     public function store(StoreUsuarioRequest $request){
