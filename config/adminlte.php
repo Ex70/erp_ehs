@@ -316,16 +316,28 @@ return [
             'can'     => 'usuarios.ver',
             'submenu' => [
                 [
-                    'text'  => 'Usuarios',
-                    'url'   => 'usuarios',
-                    'icon'  => 'fas fa-users',
-                    'can'   => 'usuarios.ver',
+                    'text' => 'Usuarios',
+                    'url'  => 'usuarios',
+                    'icon' => 'fas fa-users',
+                    'can'  => 'usuarios.ver',
                 ],
                 [
-                    'text' => 'Puestos',        // <-- agregar
+                    'text' => 'Puestos',
                     'url'  => 'puestos',
                     'icon' => 'fas fa-briefcase',
                     'can'  => 'puestos.ver',
+                ],
+                [
+                    'text' => 'Roles',          // <-- nuevo
+                    'url'  => 'roles',
+                    'icon' => 'fas fa-user-tag',
+                    'can'  => 'roles.ver',
+                ],
+                [
+                    'text' => 'Permisos',       // <-- nuevo
+                    'url'  => 'permisos',
+                    'icon' => 'fas fa-key',
+                    'can'  => 'permisos.ver',
                 ],
             ],
         ],
