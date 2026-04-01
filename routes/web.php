@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PuestoController;
@@ -30,9 +31,12 @@ Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
 
 // Solo autenticados
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
-    // Perfil propio — accesible para cualquier usuario autenticado
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+         ->name('dashboard');
+
+    // Perfil
     Route::prefix('perfil')->name('perfil.')->group(function () {
         Route::get('/',         [PerfilController::class, 'show'])          ->name('show');
         Route::get('/editar',   [PerfilController::class, 'edit'])          ->name('edit');
@@ -41,4 +45,5 @@ Route::middleware('auth')->group(function () {
         Route::post('/avatar',  [PerfilController::class, 'avatar'])        ->name('avatar');
         Route::delete('/avatar',[PerfilController::class, 'eliminarAvatar'])->name('avatar.eliminar');
     });
+
 });

@@ -324,7 +324,12 @@ return [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
-
+        [
+            'text'   => 'Dashboard',
+            'url'    => 'dashboard',
+            'icon'   => 'fas fa-tachometer-alt',
+            'active' => ['dashboard'],
+        ],
         [
             'text'    => 'Administración',
             'icon'    => 'fas fa-cogs',
