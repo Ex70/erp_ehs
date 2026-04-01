@@ -361,6 +361,17 @@ return [
                 ],
             ],
         ],
+        [
+            'header' => 'SISTEMAS',
+            'can'    => 'redes.ver',
+        ],
+        [
+            'text'    => 'Redes y Conectividad',
+            'url'     => 'sistemas/redes',
+            'icon'    => 'fas fa-network-wired',
+            'can'     => 'redes.ver',
+            'active'  => ['sistemas/redes*'],
+        ],
         // Sidebar items:
         [
             'type' => 'sidebar-menu-search',

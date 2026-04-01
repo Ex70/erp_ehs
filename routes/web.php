@@ -5,6 +5,7 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PuestoController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\Sistemas\AsignacionIpController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
 Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
     Route::resource('puestos', PuestoController::class);
     Route::resource('usuarios', UsuarioController::class);
+
+    Route::resource('sistemas/redes', AsignacionIpController::class)->names('sistemas.redes');
 });
 
 // Solo autenticados
