@@ -108,9 +108,9 @@
                     <select name="q_dispositivo" class="form-control form-control-sm">
                         <option value="">Todos</option>
                         @foreach($tiposDispositivo as $tipo)
-                            <option value="{{ $tipo }}"
-                                {{ request('q_dispositivo') == $tipo ? 'selected' : '' }}>
-                                {{ $tipo }}
+                            <option value="{{ $tipo->nombre }}"
+                                {{ request('q_dispositivo') == $tipo->nombre ? 'selected' : '' }}>
+                                {{ $tipo->nombre }}
                             </option>
                         @endforeach
                     </select>
@@ -168,14 +168,14 @@
                                     {{ $a->direccion_ip }}
                                 </span>
                             </td>
-                            <td>{{ $a->dispositivo }}</td>
+                            <td>{{ $a->dispositivo?->nombre ?? '—' }}</td>
                             <td>
                                 <span class="badge badge-success">
                                     {{ $a->area }}
                                 </span>
                             </td>
                             <td>{{ $a->puesto }}</td>
-                            <td>{{ $a->marca }} {{ $a->modelo }}</td>
+                            <td>{{ $a->marca?->nombre ?? '—' }} {{ $a->modelo }}</td>
                             <td>
                                 <code style="font-size:11px">{{ $a->numero_serie }}</code>
                             </td>

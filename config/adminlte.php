@@ -372,6 +372,23 @@ return [
             'can'     => 'redes.ver',
             'active'  => ['sistemas/redes*'],
         ],
+        [
+            'text'    => 'Catálogos — Sistemas',
+            'icon'    => 'fas fa-cog',
+            'can'     => 'redes.ver',
+            'submenu' => [
+                [
+                    'text' => 'Dispositivos',
+                    'url'  => 'sistemas/dispositivos',
+                    'icon' => 'fas fa-laptop',
+                ],
+                [
+                    'text' => 'Marcas',
+                    'url'  => 'sistemas/marcas',
+                    'icon' => 'fas fa-tag',
+                ],
+            ],
+        ],
         // Sidebar items:
         [
             'type' => 'sidebar-menu-search',

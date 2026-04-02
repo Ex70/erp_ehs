@@ -14,15 +14,13 @@ class AsignacionIp extends Model
     protected $fillable = [
         'codigo',
         'user_id',
-        'nombre',
+        'dispositivo_id',
+        'marca_id',
         'direccion_ip',
         'direccion_mac',
-        'dispositivo',
-        'marca',
         'modelo',
         'numero_serie',
         'area',
-        'puesto',
         'fecha_asignacion',
     ];
 
@@ -30,34 +28,40 @@ class AsignacionIp extends Model
         'fecha_asignacion' => 'date',
     ];
 
-    // Relación opcional con el usuario del sistema
+    // Relaciones
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Generar código automático tipo GQZ0001
-    public static function generarCodigo(): string
+    public function dispositivo()
     {
-        $ultimo = static::withTrashed()
-                        ->orderByDesc('id')
-                        ->value('codigo');
-
-        if (!$ultimo) {
-            return 'GQZ0001';
-        }
-
-        $numero = (int) substr($ultimo, 3);
-        return 'GQZ' . str_pad($numero + 1, 4, '0', STR_PAD_LEFT);
+        return $this->belongsTo(Dispositivo::class);
     }
 
-    // Tipos de dispositivo disponibles
-    public static function tiposDispositivo(): array
+    public function marca()
     {
-        return [
-            'Laptop', 'Desktop', 'Impresora',
-            'Servidor', 'Switch', 'Router',
-            'Tablet', 'Otro',
-        ];
+        return $this->belongsTo(Marca::class);
+    }
+
+    // Helpers
+    // El nombre viene del usuario vinculado
+    public function getNombreAttribute(): string
+    {
+        return $this->usuario?->name ?? '—';
+    }
+
+    // El puesto viene del usuario vinculado
+    public function getPuestoAttribute(): string
+    {
+        return $this->usuario?->puesto?->nombre ?? '—';
+    }
+
+    public static function generarCodigo(): string
+    {
+        $ultimo = static::withTrashed()->orderByDesc('id')->value('codigo');
+        if (!$ultimo) return 'GQZ0001';
+        $numero = (int) substr($ultimo, 3);
+        return 'GQZ' . str_pad($numero + 1, 4, '0', STR_PAD_LEFT);
     }
 }

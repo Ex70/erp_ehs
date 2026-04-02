@@ -11,11 +11,15 @@ class StoreAsignacionIpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id'          => 'nullable|exists:users,id',
-            'nombre'           => 'required|string|max:100',
+            // user_id ahora es obligatorio
+            'user_id'          => 'required|exists:users,id',
+
+            // dispositivo y marca ahora son FK
+            'dispositivo_id'   => 'required|exists:dispositivos,id',
+            'marca_id'         => 'required|exists:marcas,id',
+
             'direccion_ip'     => [
-                'required',
-                'ip',
+                'required', 'ip',
                 'unique:asignaciones_ip,direccion_ip',
             ],
             'direccion_mac'    => [
@@ -23,12 +27,9 @@ class StoreAsignacionIpRequest extends FormRequest
                 'regex:/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/',
                 'unique:asignaciones_ip,direccion_mac',
             ],
-            'dispositivo'      => 'required|string|max:50',
-            'marca'            => 'required|string|max:60',
             'modelo'           => 'required|string|max:80',
             'numero_serie'     => 'required|string|max:60|unique:asignaciones_ip,numero_serie',
             'area'             => 'required|string|max:100',
-            'puesto'           => 'required|string|max:100',
             'fecha_asignacion' => 'nullable|date',
         ];
     }
@@ -36,20 +37,22 @@ class StoreAsignacionIpRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nombre.required'           => 'El nombre del usuario es obligatorio.',
-            'direccion_ip.required'     => 'La dirección IP es obligatoria.',
-            'direccion_ip.ip'           => 'El formato de IP no es válido. Ej: 192.168.0.111',
-            'direccion_ip.unique'       => 'Esta dirección IP ya está registrada en el sistema.',
-            'direccion_mac.required'    => 'La dirección MAC es obligatoria.',
-            'direccion_mac.regex'       => 'Formato MAC inválido. Ej: 00:1e:c2:9e:28:6b',
-            'direccion_mac.unique'      => 'Esta dirección MAC ya está registrada.',
-            'dispositivo.required'      => 'El tipo de dispositivo es obligatorio.',
-            'marca.required'            => 'La marca es obligatoria.',
-            'modelo.required'           => 'El modelo es obligatorio.',
-            'numero_serie.required'     => 'El número de serie es obligatorio.',
-            'numero_serie.unique'       => 'Este número de serie ya está registrado.',
-            'area.required'             => 'El área es obligatoria.',
-            'puesto.required'           => 'El puesto es obligatorio.',
+            'user_id.required'        => 'Debes seleccionar un usuario.',
+            'user_id.exists'          => 'El usuario seleccionado no existe.',
+            'dispositivo_id.required' => 'Selecciona un tipo de dispositivo.',
+            'dispositivo_id.exists'   => 'El dispositivo seleccionado no es válido.',
+            'marca_id.required'       => 'Selecciona una marca.',
+            'marca_id.exists'         => 'La marca seleccionada no es válida.',
+            'direccion_ip.required'   => 'La dirección IP es obligatoria.',
+            'direccion_ip.ip'         => 'Formato de IP inválido. Ej: 192.168.0.111',
+            'direccion_ip.unique'     => 'Esta IP ya está registrada en el sistema.',
+            'direccion_mac.required'  => 'La dirección MAC es obligatoria.',
+            'direccion_mac.regex'     => 'Formato MAC inválido. Ej: 00:1e:c2:9e:28:6b',
+            'direccion_mac.unique'    => 'Esta MAC ya está registrada.',
+            'modelo.required'         => 'El modelo es obligatorio.',
+            'numero_serie.required'   => 'El número de serie es obligatorio.',
+            'numero_serie.unique'     => 'Este número de serie ya está registrado.',
+            'area.required'           => 'El área es obligatoria.',
         ];
     }
 }

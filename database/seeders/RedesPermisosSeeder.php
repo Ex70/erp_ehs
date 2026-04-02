@@ -20,12 +20,24 @@ class RedesPermisosSeeder extends Seeder
             'redes.eliminar',
         ];
 
+        $permisosCatalogos = [
+            'catalogos_sistemas.ver',
+            'catalogos_sistemas.crear',
+            'catalogos_sistemas.editar',
+            'catalogos_sistemas.eliminar',
+        ];
+
         foreach ($permisos as $permiso) {
+            Permission::firstOrCreate(['name' => $permiso]);
+        }
+
+        foreach ($permisosCatalogos as $permiso) {
             Permission::firstOrCreate(['name' => $permiso]);
         }
 
         // Asignar todos al administrador
         $admin = Role::findByName('administrador');
         $admin->givePermissionTo($permisos);
+        $admin->givePermissionTo($permisosCatalogos);
     }
 }

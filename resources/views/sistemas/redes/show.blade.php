@@ -77,11 +77,11 @@
                     </tr>
                     <tr>
                         <th>Tipo</th>
-                        <td>{{ $asignacion_ip->dispositivo }}</td>
+                        <td>{{ $asignacion_ip->dispositivo?->nombre ?? '—' }}</td>
                     </tr>
                     <tr>
                         <th>Marca</th>
-                        <td>{{ $asignacion_ip->marca }}</td>
+                        <td>{{ $asignacion_ip->marca?->nombre ?? '—' }}</td>
                     </tr>
                     <tr>
                         <th>Modelo</th>
