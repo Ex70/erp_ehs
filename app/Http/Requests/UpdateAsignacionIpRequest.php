@@ -13,7 +13,7 @@ class UpdateAsignacionIpRequest extends FormRequest
         $id = $this->route('asignacion_ip')->id;
 
         return [
-            'user_id'          => 'nullable|exists:users,id',
+            'user_id'          => 'required|exists:users,id',
             'nombre'           => 'required|string|max:100',
             'direccion_ip'     => [
                 'required',

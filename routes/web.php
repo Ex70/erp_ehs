@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\Adquisiciones\AdjudicacionController;
+use App\Http\Controllers\Adquisiciones\CatalogoController;
+use App\Http\Controllers\Adquisiciones\ClienteController;
+use App\Http\Controllers\Adquisiciones\EmpresaController;
+use App\Http\Controllers\Adquisiciones\NotaController;
+use App\Http\Controllers\Adquisiciones\ProveedorController;
+use App\Http\Controllers\Adquisiciones\RequerimientoController;
+use App\Http\Controllers\Adquisiciones\UnidadMedidaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermisoController;
@@ -59,7 +67,40 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
 
         Route::resource('marcas', MarcaController::class)
              ->except(['create', 'edit', 'show']);
-
     });
+
+    // Adquisiciones — acceso por rol
+        Route::middleware(['auth', 'role:administrador|coordinador|auxiliar'])
+            ->prefix('adquisiciones')
+            ->name('adquisiciones.')
+            ->group(function () {
+
+                // Requerimientos
+                Route::resource('requerimientos', RequerimientoController::class);
+
+                // Adjudicación
+                Route::post('requerimientos/{requerimiento}/adjudicar',
+                    [AdjudicacionController::class, 'store'])
+                    ->name('requerimientos.adjudicar');
+
+                // Notas
+                Route::post('requerimientos/{requerimiento}/notas',
+                    [NotaController::class, 'store'])
+                    ->name('requerimientos.notas.store');
+                Route::delete('notas/{nota}',
+                    [NotaController::class, 'destroy'])
+                    ->name('notas.destroy');
+
+                // Catálogos
+                Route::resource('clientes',ClienteController::class)->except(['create','edit','show']);
+                Route::resource('empresas',EmpresaController::class)->except(['create','edit','show']);
+                Route::resource('proveedores', ProveedorController::class)->except(['create', 'edit', 'show']);
+                Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])->name('proveedores.ranking');
+                Route::resource('unidades-medida',UnidadMedidaController::class)
+                    ->except(['create','edit','show'])
+                    ->parameters(['unidades-medida' => 'unidad_medida']);
+
+                    Route::get('catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
+            });
 
 });

@@ -389,6 +389,36 @@ return [
                 ],
             ],
         ],
+        [
+            'header' => 'ADQUISICIONES',
+            'can'    => 'adquisiciones.ver',
+        ],
+        [
+            'text'    => 'Requerimientos',
+            'url'     => 'adquisiciones/requerimientos',
+            'icon'    => 'fas fa-shopping-cart',
+            'can'     => 'adquisiciones.ver',
+            'active'  => ['adquisiciones/requerimientos*'],
+        ],
+        [
+            'text'    => 'Catálogos',
+            'icon'    => 'fas fa-cog',
+            'can'     => 'cat_adquisiciones.ver',
+            'submenu' => [
+                [
+                    'text'   => 'Proveedores',
+                    'url'    => 'adquisiciones/proveedores',
+                    'icon'   => 'fas fa-truck',
+                    'active' => ['adquisiciones/proveedores*'],
+                ],
+                [
+                    'text'   => 'Clientes, Empresas y Unidades',
+                    'url'    => 'adquisiciones/catalogos',
+                    'icon'   => 'fas fa-list',
+                    'active' => ['adquisiciones/catalogos*'],
+                ],
+            ],
+        ],
         // Sidebar items:
         [
             'type' => 'sidebar-menu-search',

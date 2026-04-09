@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Puesto;
 use App\Http\Requests\StoreUsuarioRequest;
 use App\Http\Requests\UpdateUsuarioRequest;
+use App\Notifications\BienvenidoUsuario;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -28,16 +29,34 @@ class UsuarioController extends Controller
 
     public function store(StoreUsuarioRequest $request){
         $data = $request->validated();
+
+        // Guardar contraseña en texto plano ANTES de hashearla
+        // para incluirla en el correo
+        $passwordTemporal = $data['password'];
+
         $data['password'] = Hash::make($data['password']);
         $data['activo']   = $request->boolean('activo', true);
+
         if ($request->hasFile('avatar')) {
-            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = $request->file('avatar')
+                                    ->store('avatars', 'public');
         }
+
         $usuario = User::create($data);
         $usuario->assignRole($request->role);
+
+        // Enviar notificación de bienvenida
+        try {
+            $usuario->notify(new BienvenidoUsuario($passwordTemporal));
+        } catch (\Exception $e) {
+            // Si falla el correo no interrumpimos el flujo
+            // El usuario ya fue creado correctamente
+            logger()->error('Error al enviar correo de bienvenida: ' . $e->getMessage());
+        }
+
         return redirect()
             ->route('usuarios.index')
-            ->with('success', 'Usuario creado correctamente.');
+            ->with('success', 'Usuario creado correctamente. Se ha enviado un correo de bienvenida.');
     }
 
     public function show(User $usuario){

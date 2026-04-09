@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             PuestosSeeder::class,
             RolesPermisosSeeder::class,
             DispositivosMarcasSeeder::class,
+            AdquisicionesCatalogosSeeder::class,
+            AdquisicionesPermisosSeeder::class,
         ]);
     }
 }
