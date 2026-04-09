@@ -3,6 +3,8 @@
 use App\Http\Controllers\Adquisiciones\AdjudicacionController;
 use App\Http\Controllers\Adquisiciones\CatalogoController;
 use App\Http\Controllers\Adquisiciones\ClienteController;
+use App\Http\Controllers\Adquisiciones\DependenciaController;
+use App\Http\Controllers\Adquisiciones\DestinatarioController;
 use App\Http\Controllers\Adquisiciones\EmpresaController;
 use App\Http\Controllers\Adquisiciones\NotaController;
 use App\Http\Controllers\Adquisiciones\ProveedorController;
@@ -101,6 +103,14 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
                     ->parameters(['unidades-medida' => 'unidad_medida']);
 
                     Route::get('catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
+
+                // Destinatarios
+                Route::resource('destinatarios', DestinatarioController::class)
+                    ->except(['create', 'edit', 'show']);
+
+                // Catálogo de dependencias
+                Route::resource('dependencias', DependenciaController::class)
+                    ->except(['create', 'edit', 'show']);
             });
 
 });

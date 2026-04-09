@@ -401,6 +401,13 @@ return [
             'active'  => ['adquisiciones/requerimientos*'],
         ],
         [
+            'text'   => 'Destinatarios',
+            'url'    => 'adquisiciones/destinatarios',
+            'icon'   => 'fas fa-address-book',
+            'active' => ['adquisiciones/destinatarios*'],
+            'can'    => 'adquisiciones.ver',
+        ],
+        [
             'text'    => 'Catálogos',
             'icon'    => 'fas fa-cog',
             'can'     => 'cat_adquisiciones.ver',
@@ -409,13 +416,16 @@ return [
                     'text'   => 'Proveedores',
                     'url'    => 'adquisiciones/proveedores',
                     'icon'   => 'fas fa-truck',
-                    'active' => ['adquisiciones/proveedores*'],
+                ],
+                [
+                    'text'   => 'Dependencias',
+                    'url'    => 'adquisiciones/dependencias',
+                    'icon'   => 'fas fa-building',
                 ],
                 [
                     'text'   => 'Clientes, Empresas y Unidades',
                     'url'    => 'adquisiciones/catalogos',
                     'icon'   => 'fas fa-list',
-                    'active' => ['adquisiciones/catalogos*'],
                 ],
             ],
         ],
