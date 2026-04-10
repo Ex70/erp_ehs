@@ -34,6 +34,7 @@
                         <th>Puesto</th>
                         <th>Rol</th>
                         <th>Estado</th>
+                        <th>Registro</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -65,6 +66,21 @@
                                 @endif
                             </td>
                             <td>
+                                @if($usuario->registro_completado_at)
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check"></i> Completado
+                                    </span>
+                                @elseif($usuario->registro_token)
+                                    <span class="badge badge-warning">
+                                        <i class="fas fa-clock"></i> Pendiente
+                                    </span>
+                                @else
+                                    <span class="badge badge-secondary">
+                                        <i class="fas fa-minus"></i> Sin enlace
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
                                 <a href="{{ route('usuarios.show', $usuario) }}"
                                    class="btn btn-info btn-xs">
                                     <i class="fas fa-eye"></i>
@@ -85,6 +101,15 @@
                                         </button>
                                     </form>
                                 @endcan
+                                @if(!$usuario->registro_completado_at && $usuario->registro_token)
+                                    <form action="{{ route('usuarios.reenviar-registro', $usuario) }}"
+                                        method="POST" class="d-inline">
+                                        @csrf
+                                        <button class="btn btn-info btn-xs" title="Reenviar enlace de registro">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

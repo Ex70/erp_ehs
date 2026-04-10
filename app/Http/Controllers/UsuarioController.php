@@ -10,6 +10,7 @@ use App\Notifications\BienvenidoUsuario;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UsuarioController extends Controller
 {
@@ -30,12 +31,13 @@ class UsuarioController extends Controller
     public function store(StoreUsuarioRequest $request){
         $data = $request->validated();
 
-        // Guardar contraseña en texto plano ANTES de hashearla
-        // para incluirla en el correo
+        // Guardar contraseña temporal antes de hashear
         $passwordTemporal = $data['password'];
-
         $data['password'] = Hash::make($data['password']);
         $data['activo']   = $request->boolean('activo', true);
+
+        // Generar token único de registro
+        $data['registro_token'] = Str::random(64);
 
         if ($request->hasFile('avatar')) {
             $data['avatar'] = $request->file('avatar')
@@ -45,18 +47,21 @@ class UsuarioController extends Controller
         $usuario = User::create($data);
         $usuario->assignRole($request->role);
 
-        // Enviar notificación de bienvenida
+        // Generar URL de completar registro
+        $urlRegistro = route('registro.completar', [
+            'token' => $usuario->registro_token,
+        ]);
+
+        // Enviar notificación
         try {
-            $usuario->notify(new BienvenidoUsuario($passwordTemporal));
+            $usuario->notify(new BienvenidoUsuario($passwordTemporal, $urlRegistro));
         } catch (\Exception $e) {
-            // Si falla el correo no interrumpimos el flujo
-            // El usuario ya fue creado correctamente
             logger()->error('Error al enviar correo de bienvenida: ' . $e->getMessage());
         }
 
         return redirect()
             ->route('usuarios.index')
-            ->with('success', 'Usuario creado correctamente. Se ha enviado un correo de bienvenida.');
+            ->with('success', 'Usuario creado correctamente. Se envió el correo de bienvenida.');
     }
 
     public function show(User $usuario){
@@ -101,5 +106,31 @@ class UsuarioController extends Controller
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario desactivado correctamente.');
+    }
+
+    public function reenviarRegistro(User $usuario){
+        if ($usuario->registro_completado_at) {
+            return back()->with('info', 'Este usuario ya completó su registro.');
+        }
+
+        // Regenerar token si no tiene
+        if (!$usuario->registro_token) {
+            $usuario->update(['registro_token' => \Illuminate\Support\Str::random(64)]);
+        }
+
+        $urlRegistro = route('registro.completar', [
+            'token' => $usuario->registro_token,
+        ]);
+
+        try {
+            $usuario->notify(new \App\Notifications\BienvenidoUsuario(
+                '(tu contraseña actual)',
+                $urlRegistro
+            ));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al enviar el correo: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Enlace de registro reenviado correctamente.');
     }
 }

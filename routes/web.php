@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PuestoController;
+use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\Sistemas\AsignacionIpController;
 use App\Http\Controllers\Sistemas\DispositivoController;
@@ -30,6 +31,16 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// Completar registro (enlace enviado por correo — acceso público)
+Route::get('/registro/completar/{token}', [RegistroController::class, 'completar'])->name('registro.completar');
+
+Route::post('/registro/completar/{token}', [RegistroController::class, 'guardar'])->name('registro.guardar');
+
+Route::post('usuarios/{usuario}/reenviar-registro',
+    [UsuarioController::class, 'reenviarRegistro'])
+    ->name('usuarios.reenviar-registro')
+    ->middleware(['auth', 'role:administrador']);
 
 // ─── Solo autenticados ────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {

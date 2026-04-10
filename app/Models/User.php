@@ -24,6 +24,8 @@ class User extends Authenticatable
         'puesto_id',
         'avatar',
         'activo',
+        'registro_token',
+        'registro_completado_at',
     ];
 
     /**
@@ -47,6 +49,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'activo'            => 'boolean',
+            'registro_completado_at'  => 'datetime',
         ];
     }
 
@@ -74,5 +77,9 @@ class User extends Authenticatable
     public function adminlte_profile_url(): string
     {
         return route('perfil.show');
+    }
+
+    public function getRegistroCompletadoAttribute(): bool{
+        return !is_null($this->registro_completado_at);
     }
 }
