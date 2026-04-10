@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Adquisiciones\AdjudicacionController;
 use App\Http\Controllers\Adquisiciones\CatalogoController;
+use App\Http\Controllers\Adquisiciones\CategoriaProductoController;
 use App\Http\Controllers\Adquisiciones\ClienteController;
 use App\Http\Controllers\Adquisiciones\DependenciaController;
 use App\Http\Controllers\Adquisiciones\DestinatarioController;
 use App\Http\Controllers\Adquisiciones\EmpresaController;
 use App\Http\Controllers\Adquisiciones\NotaController;
+use App\Http\Controllers\Adquisiciones\ProductoController;
 use App\Http\Controllers\Adquisiciones\ProveedorController;
 use App\Http\Controllers\Adquisiciones\RequerimientoController;
 use App\Http\Controllers\Adquisiciones\UnidadMedidaController;
@@ -110,6 +112,13 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
 
                 // Catálogo de dependencias
                 Route::resource('dependencias', DependenciaController::class)
+                    ->except(['create', 'edit', 'show']);
+
+                // Productos y servicios frecuentes
+                Route::resource('productos', ProductoController::class);
+
+                // Catálogo de categorías
+                Route::resource('categorias-producto', CategoriaProductoController::class)
                     ->except(['create', 'edit', 'show']);
             });
 

@@ -408,6 +408,19 @@ return [
             'can'    => 'adquisiciones.ver',
         ],
         [
+            'text'   => 'Productos y Servicios',
+            'url'    => 'adquisiciones/productos',
+            'icon'   => 'fas fa-box-open',
+            'active' => ['adquisiciones/productos*'],
+            'can'    => 'adquisiciones.ver',
+        ],
+        // En catálogos:
+        [
+            'text' => 'Categorías de producto',
+            'url'  => 'adquisiciones/categorias-producto',
+            'icon' => 'fas fa-tags',
+        ],
+        [
             'text'    => 'Catálogos',
             'icon'    => 'fas fa-cog',
             'can'     => 'cat_adquisiciones.ver',

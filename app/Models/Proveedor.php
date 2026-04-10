@@ -42,4 +42,8 @@ class Proveedor extends Model
                     ->where('ganador', true)
                     ->count();
     }
+
+    public function productos(){
+        return $this->belongsToMany(Producto::class, 'producto_proveedor');
+    }
 }
