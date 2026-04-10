@@ -13,6 +13,12 @@ use App\Http\Controllers\Adquisiciones\ProveedorController;
 use App\Http\Controllers\Adquisiciones\RequerimientoController;
 use App\Http\Controllers\Adquisiciones\UnidadMedidaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Helpdesk\AsignacionController;
+use App\Http\Controllers\Helpdesk\CalificacionController;
+use App\Http\Controllers\Helpdesk\CatalogoHelpdeskController;
+use App\Http\Controllers\Helpdesk\DashboardHelpdeskController;
+use App\Http\Controllers\Helpdesk\SeguimientoController;
+use App\Http\Controllers\Helpdesk\TicketController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PuestoController;
@@ -132,5 +138,47 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
                 Route::resource('categorias-producto', CategoriaProductoController::class)
                     ->except(['create', 'edit', 'show']);
             });
+
+
+    // Helpdesk — todos los autenticados pueden crear tickets
+    Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function () {
+
+        // Dashboard — solo admin/coordinador/auxiliar
+        Route::get('dashboard', [DashboardHelpdeskController::class, 'index'])
+            ->name('dashboard')
+            ->middleware('can:tickets.dashboard');
+
+        // Tickets
+        Route::resource('tickets', TicketController::class);
+
+        // Asignación — solo admin/coordinador
+        Route::post('tickets/{ticket}/asignar', [AsignacionController::class, 'store'])
+            ->name('tickets.asignar')
+            ->middleware('can:tickets.asignar');
+
+        // Seguimiento — admin/coordinador/auxiliar
+        Route::post('tickets/{ticket}/seguimiento', [SeguimientoController::class, 'store'])
+            ->name('tickets.seguimiento')
+            ->middleware('can:tickets.asignar');
+
+        // Calificación — solicitante
+        Route::post('tickets/{ticket}/calificar', [CalificacionController::class, 'store'])
+            ->name('tickets.calificar');
+
+        // Catálogos — solo admin
+        Route::middleware('role:administrador|coordinador')->group(function () {
+            Route::get('catalogos', [CatalogoHelpdeskController::class, 'index'])
+                ->name('catalogos.index');
+            Route::post('catalogos/tipos-falla', [CatalogoHelpdeskController::class, 'storeTipo'])
+                ->name('catalogos.tipos.store');
+            Route::put('catalogos/tipos-falla/{tipoFalla}', [CatalogoHelpdeskController::class, 'updateTipo'])
+                ->name('catalogos.tipos.update');
+            Route::post('catalogos/categorias', [CatalogoHelpdeskController::class, 'storeCategoria'])
+                ->name('catalogos.categorias.store');
+            Route::put('catalogos/categorias/{categoriaServicio}', [CatalogoHelpdeskController::class, 'updateCategoria'])
+                ->name('catalogos.categorias.update');
+        });
+
+    });
 
 });

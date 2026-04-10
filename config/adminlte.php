@@ -442,6 +442,34 @@ return [
                 ],
             ],
         ],
+        [
+            'header' => 'MESA DE AYUDA',
+        ],
+        [
+            'text'    => 'Mis tickets',
+            'url'     => 'helpdesk/tickets',
+            'icon'    => 'fas fa-ticket-alt',
+            'active'  => ['helpdesk/tickets*'],
+        ],
+        [
+            'text'    => 'Nueva incidencia',
+            'url'     => 'helpdesk/tickets/create',
+            'icon'    => 'fas fa-plus-circle',
+        ],
+        [
+            'text'    => 'Dashboard soporte',
+            'url'     => 'helpdesk/dashboard',
+            'icon'    => 'fas fa-chart-pie',
+            'can'     => 'tickets.dashboard',
+            'active'  => ['helpdesk/dashboard'],
+        ],
+        [
+            'text'    => 'Catálogos soporte',
+            'url'     => 'helpdesk/catalogos',
+            'icon'    => 'fas fa-cog',
+            'can'     => 'tickets.asignar',
+            'active'  => ['helpdesk/catalogos*'],
+        ],
         // Sidebar items:
         [
             'type' => 'sidebar-menu-search',

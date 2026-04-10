@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             DispositivosMarcasSeeder::class,
             AdquisicionesCatalogosSeeder::class,
             AdquisicionesPermisosSeeder::class,
+            HelpdeskCatalogosSeeder::class,
+            HelpdeskPermisosSeeder::class,
         ]);
     }
 }
