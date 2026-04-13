@@ -1,3 +1,6 @@
+@php
+    use App\Models\Ticket;
+@endphp
 @extends('adminlte::page')
 @section('title', 'Dashboard Helpdesk')
 

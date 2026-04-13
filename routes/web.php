@@ -27,6 +27,11 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\Sistemas\AsignacionIpController;
 use App\Http\Controllers\Sistemas\DispositivoController;
 use App\Http\Controllers\Sistemas\MarcaController;
+use App\Http\Controllers\Solvencias\CuentaBancariaController;
+use App\Http\Controllers\Solvencias\EmpresaSolvenciaController;
+use App\Http\Controllers\Solvencias\ProveedorSolvenciaController;
+use App\Http\Controllers\Solvencias\SolvenciaController;
+use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -74,7 +79,8 @@ Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
 // ─── Solo administrador ───────────────────────────────────────────────────────
 Route::middleware(['auth', 'role:administrador'])->group(function () {
 
-    Route::resource('roles',    RolController::class);
+    // Route::resource('roles',    RolController::class);
+    Route::resource('roles', RolController::class)->parameters(['roles' => 'rol']);
     Route::resource('permisos', PermisoController::class);
 
     // Módulo Sistemas — prefijo y nombre agrupados
@@ -138,6 +144,44 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
                 Route::resource('categorias-producto', CategoriaProductoController::class)
                     ->except(['create', 'edit', 'show']);
             });
+
+
+    Route::middleware(['auth', 'role:administrador|coordinador|auxiliar'])
+    ->prefix('solvencias')
+    ->name('solvencias.')
+    ->group(function () {
+
+        // Solvencias
+        Route::resource('/', SolvenciaController::class)
+             ->parameters(['' => 'solvencia'])
+             ->names([
+                 'index'   => 'solvencias.index',
+                 'create'  => 'solvencias.create',
+                 'store'   => 'solvencias.store',
+                 'show'    => 'solvencias.show',
+                 'edit'    => 'solvencias.edit',
+                 'update'  => 'solvencias.update',
+                 'destroy' => 'solvencias.destroy',
+             ]);
+
+        // PDF
+        Route::get('{solvencia}/pdf',
+            [SolvenciaPdfController::class, 'generar'])
+            ->name('pdf');
+
+        // Proveedores
+        Route::resource('proveedores', ProveedorSolvenciaController::class)
+             ->parameters(['proveedores' => 'proveedoresSolvencia']);
+
+        // API: cuentas por proveedor
+        Route::get('api/proveedor/{proveedor}/cuentas',
+            [CuentaBancariaController::class, 'porProveedor'])
+            ->name('api.cuentas');
+
+        // Empresas
+        Route::resource('empresas', EmpresaSolvenciaController::class)
+             ->except(['create', 'edit', 'show']);
+    });
 
 
     // Helpdesk — todos los autenticados pueden crear tickets

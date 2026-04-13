@@ -49,8 +49,7 @@ class RolController extends Controller
         return view('roles.show', compact('rol', 'permisosPorModulo', 'usuarios'));
     }
 
-    public function edit(Role $rol)
-    {
+    public function edit(Role $rol){
         $permisos = Permission::orderBy('name')->get()
             ->groupBy(fn($p) => explode('.', $p->name)[0]);
 

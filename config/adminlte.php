@@ -373,6 +373,31 @@ return [
             'active'  => ['sistemas/redes*'],
         ],
         [
+            'text'    => 'Solvencias Económicas',
+            'icon'    => 'fas fa-file-invoice-dollar',
+            'active'  => ['solvencias*'],
+            'submenu' => [
+                [
+                    'text'   => 'Solicitudes',
+                    'url'    => 'solvencias',
+                    'icon'   => 'fas fa-file-alt',
+                    'active' => ['solvencias$', 'solvencias/create*'],
+                ],
+                [
+                    'text'   => 'Proveedores',
+                    'url'    => 'solvencias/proveedores',
+                    'icon'   => 'fas fa-truck',
+                    'active' => ['solvencias/proveedores*'],
+                ],
+                [
+                    'text'   => 'Empresas internas',
+                    'url'    => 'solvencias/empresas',
+                    'icon'   => 'fas fa-building',
+                    'active' => ['solvencias/empresas*'],
+                ],
+            ],
+        ],
+        [
             'text'    => 'Catálogos — Sistemas',
             'icon'    => 'fas fa-cog',
             'can'     => 'redes.ver',
