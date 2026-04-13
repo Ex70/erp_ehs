@@ -130,6 +130,10 @@
                             </td>
                             <td>{{ $p->condiciones_pago ?? '—' }}</td>
                             <td>
+                                <a href="{{ route('adquisiciones.proveedores.show', $p) }}"
+                                class="btn btn-info btn-xs">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                                 <button class="btn btn-warning btn-xs"
                                         onclick="editarProveedor({{ $p->id }})">
                                     <i class="fas fa-edit"></i>

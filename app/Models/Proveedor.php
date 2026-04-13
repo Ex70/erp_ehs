@@ -46,4 +46,13 @@ class Proveedor extends Model
     public function productos(){
         return $this->belongsToMany(Producto::class, 'producto_proveedor');
     }
+
+    public function cuentasBancarias(){
+        return $this->hasMany(ProveedorCuentaBancaria::class);
+    }
+
+    public function cuentaPrincipal(){
+        return $this->hasOne(ProveedorCuentaBancaria::class)
+                    ->where('principal', true);
+    }
 }

@@ -46,10 +46,10 @@ class SolvenciaController extends Controller
     public function create()
     {
         $empresas    = EmpresaSolvencia::where('activo', true)->orderBy('nombre')->get();
-        $proveedores = ProveedorSolvencia::where('activo', true)
-                                         ->with('cuentasBancarias')
-                                         ->orderBy('nombre')
-                                         ->get();
+        $proveedores = \App\Models\Proveedor::where('activo', true)
+                                    ->with('cuentasBancarias')
+                                    ->orderBy('nombre')
+                                    ->get();
         $usuarios    = User::where('activo', true)->orderBy('name')->get();
         $usuario     = Auth::user()->load('puesto');
         $solvencia   = new Solvencia();
@@ -92,7 +92,7 @@ class SolvenciaController extends Controller
 
                 SolvenciaPartida::create([
                     'solvencia_id'          => $solvencia->id,
-                    'proveedor_solvencia_id'=> $p['proveedor_solvencia_id'] ?? null,
+                    'proveedor_id' => $p['proveedor_id'] ?? null,
                     'cuenta_bancaria_id'    => $p['cuenta_bancaria_id'] ?? null,
                     'numero'                => $i + 1,
                     'descripcion'           => $p['descripcion'],
@@ -127,10 +127,10 @@ class SolvenciaController extends Controller
         $solvencia->load(['partidas.proveedor', 'partidas.cuentaBancaria']);
 
         $empresas    = EmpresaSolvencia::where('activo', true)->orderBy('nombre')->get();
-        $proveedores = ProveedorSolvencia::where('activo', true)
-                                         ->with('cuentasBancarias')
-                                         ->orderBy('nombre')
-                                         ->get();
+        $proveedores = \App\Models\Proveedor::where('activo', true)
+                                    ->with('cuentasBancarias')
+                                    ->orderBy('nombre')
+                                    ->get();
         $usuarios    = User::where('activo', true)->orderBy('name')->get();
         $usuario     = Auth::user()->load('puesto');
 
@@ -167,7 +167,7 @@ class SolvenciaController extends Controller
 
                 SolvenciaPartida::create([
                     'solvencia_id'          => $solvencia->id,
-                    'proveedor_solvencia_id'=> $p['proveedor_solvencia_id'] ?? null,
+                    'proveedor_id' => $p['proveedor_id'] ?? null,
                     'cuenta_bancaria_id'    => $p['cuenta_bancaria_id'] ?? null,
                     'numero'                => $i + 1,
                     'descripcion'           => $p['descripcion'],

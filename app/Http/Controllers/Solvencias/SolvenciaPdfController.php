@@ -11,7 +11,7 @@ class SolvenciaPdfController extends Controller
         $solvencia->load([
             'empresa',
             'elaborador.puesto',
-            'partidas.proveedor',
+            'partidas.proveedor',        // usa Proveedor existente
             'partidas.cuentaBancaria',
         ]);
 

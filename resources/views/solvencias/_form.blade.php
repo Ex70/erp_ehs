@@ -188,14 +188,14 @@
                                    required>
                         </td>
                         <td>
-                            <select name="partidas[{{ $i }}][proveedor_solvencia_id]"
+                            <select name="partidas[{{ $i }}][proveedor_id]"
                                     class="form-control form-control-sm select-proveedor"
                                     data-idx="{{ $i }}"
                                     onchange="cargarCuentas(this, {{ $i }})">
                                 <option value="">— Proveedor —</option>
                                 @foreach($proveedores as $pv)
                                     <option value="{{ $pv->id }}"
-                                        {{ ($p['proveedor_solvencia_id'] ?? '') == $pv->id ? 'selected' : '' }}>
+                                        {{ ($p['proveedor_id'] ?? '') == $pv->id ? 'selected' : '' }}>
                                         {{ $pv->nombre }}
                                     </option>
                                 @endforeach

@@ -7,8 +7,11 @@ class SolvenciaPartida extends Model
 {
     protected $table    = 'solvencia_partidas';
     protected $fillable = [
-        'solvencia_id', 'proveedor_solvencia_id', 'cuenta_bancaria_id',
-        'numero', 'descripcion', 'cantidad', 'importe', 'concepto',
+        'solvencia_id',
+        'proveedor_id',          // FK a proveedores (tabla existente)
+        'cuenta_bancaria_id',
+        'numero', 'descripcion',
+        'cantidad', 'importe', 'concepto',
     ];
 
     protected $casts = [
@@ -23,7 +26,7 @@ class SolvenciaPartida extends Model
 
     public function proveedor()
     {
-        return $this->belongsTo(ProveedorSolvencia::class, 'proveedor_solvencia_id');
+        return $this->belongsTo(Proveedor::class);  // tabla proveedores existente
     }
 
     public function cuentaBancaria()

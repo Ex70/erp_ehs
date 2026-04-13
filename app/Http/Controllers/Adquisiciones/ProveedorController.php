@@ -144,4 +144,9 @@ class ProveedorController extends Controller
             'observaciones'       => 'nullable|string',
         ];
     }
+
+    public function show(Proveedor $proveedor){
+        $proveedor->load('cuentasBancarias');
+        return view('adquisiciones.proveedores.show', compact('proveedor'));
+    }
 }

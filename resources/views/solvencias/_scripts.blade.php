@@ -23,7 +23,7 @@ function agregarPartida() {
                    value="0" min="0" step="0.01"
                    oninput="recalcularTotales()" required></td>
         <td>
-            <select name="partidas[${idx}][proveedor_solvencia_id]"
+            <select name="partidas[${idx}][proveedor_id]"
                     class="form-control form-control-sm select-proveedor"
                     data-idx="${idx}"
                     onchange="cargarCuentas(this, ${idx})">

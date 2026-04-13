@@ -4,6 +4,7 @@ use App\Http\Controllers\Adquisiciones\AdjudicacionController;
 use App\Http\Controllers\Adquisiciones\CatalogoController;
 use App\Http\Controllers\Adquisiciones\CategoriaProductoController;
 use App\Http\Controllers\Adquisiciones\ClienteController;
+use App\Http\Controllers\Adquisiciones\CuentaBancariaProveedorController;
 use App\Http\Controllers\Adquisiciones\DependenciaController;
 use App\Http\Controllers\Adquisiciones\DestinatarioController;
 use App\Http\Controllers\Adquisiciones\EmpresaController;
@@ -151,7 +152,6 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     ->name('solvencias.')
     ->group(function () {
 
-        // Solvencias
         Route::resource('/', SolvenciaController::class)
              ->parameters(['' => 'solvencia'])
              ->names([
@@ -164,21 +164,16 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
                  'destroy' => 'solvencias.destroy',
              ]);
 
-        // PDF
         Route::get('{solvencia}/pdf',
             [SolvenciaPdfController::class, 'generar'])
             ->name('pdf');
 
-        // Proveedores
-        Route::resource('proveedores', ProveedorSolvenciaController::class)
-             ->parameters(['proveedores' => 'proveedoresSolvencia']);
-
-        // API: cuentas por proveedor
+        // API: cuentas por proveedor (usa tabla proveedores existente)
         Route::get('api/proveedor/{proveedor}/cuentas',
             [CuentaBancariaController::class, 'porProveedor'])
             ->name('api.cuentas');
 
-        // Empresas
+        // Empresas internas
         Route::resource('empresas', EmpresaSolvenciaController::class)
              ->except(['create', 'edit', 'show']);
     });
@@ -224,5 +219,19 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
         });
 
     });
+
+    // API cuentas bancarias por proveedor (para solvencias)
+    Route::get('api/proveedor/{proveedor}/cuentas',
+        [CuentaBancariaProveedorController::class, 'porProveedor'])
+        ->name('api.cuentas');
+
+    // CRUD cuentas bancarias desde proveedor
+    Route::post('proveedores/{proveedor}/cuentas',
+        [CuentaBancariaProveedorController::class, 'store'])
+        ->name('proveedores.cuentas.store');
+
+    Route::delete('cuentas/{cuenta}',
+        [CuentaBancariaProveedorController::class, 'destroy'])
+        ->name('proveedores.cuentas.destroy');
 
 });
