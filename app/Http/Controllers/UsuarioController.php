@@ -108,6 +108,31 @@ class UsuarioController extends Controller
             ->with('success', 'Usuario desactivado correctamente.');
     }
 
+    public function forceDelete(User $usuario)
+    {
+        // Solo se puede eliminar permanentemente si ya está inactivo
+        if ($usuario->activo) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Solo se pueden eliminar permanentemente usuarios inactivos.');
+        }
+
+        // Eliminar avatar del storage si existe
+        if ($usuario->avatar) {
+            Storage::disk('public')->delete($usuario->avatar);
+        }
+
+        // Revocar roles y permisos antes de eliminar
+        $usuario->syncRoles([]);
+        $usuario->syncPermissions([]);
+
+        $usuario->delete(); // Eliminación real en BD
+
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuario eliminado permanentemente.');
+    }
+
     public function reenviarRegistro(User $usuario){
         if ($usuario->registro_completado_at) {
             return back()->with('info', 'Este usuario ya completó su registro.');

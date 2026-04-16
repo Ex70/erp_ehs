@@ -92,14 +92,27 @@
                                     </a>
                                 @endcan
                                 @can('usuarios.eliminar')
-                                    <form action="{{ route('usuarios.destroy', $usuario) }}"
-                                          method="POST" class="d-inline"
-                                          onsubmit="return confirm('¿Desactivar este usuario?')">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-danger btn-xs">
-                                            <i class="fas fa-ban"></i>
-                                        </button>
-                                    </form>
+                                    {{-- Botón desactivar (solo si está activo) --}}
+                                    @if($usuario->activo)
+                                        <form action="{{ route('usuarios.destroy', $usuario) }}"
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('¿Desactivar este usuario?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-warning btn-xs" title="Desactivar">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Botón eliminar permanentemente (solo si está inactivo) --}}
+                                        <form action="{{ route('usuarios.forceDelete', $usuario) }}"
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('⚠️ ¿Eliminar permanentemente a {{ $usuario->name }}? Esta acción NO se puede deshacer.')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-danger btn-xs" title="Eliminar permanentemente">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endcan
                                 @if(!$usuario->registro_completado_at && $usuario->registro_token)
                                     <form action="{{ route('usuarios.reenviar-registro', $usuario) }}"

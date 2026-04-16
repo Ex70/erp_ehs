@@ -54,6 +54,14 @@ Route::post('usuarios/{usuario}/reenviar-registro',
     ->name('usuarios.reenviar-registro')
     ->middleware(['auth', 'role:administrador']);
 
+    Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
+    Route::resource('usuarios', UsuarioController::class);
+
+    // Eliminación permanente (solo usuarios inactivos)
+    Route::delete('usuarios/{usuario}/force-delete', [UsuarioController::class, 'forceDelete'])
+        ->name('usuarios.forceDelete');
+});
+
 // ─── Solo autenticados ────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
@@ -122,7 +130,7 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
                 // Catálogos
                 Route::resource('clientes',ClienteController::class)->except(['create','edit','show']);
                 Route::resource('empresas',EmpresaController::class)->except(['create','edit','show']);
-                Route::resource('proveedores', ProveedorController::class)->except(['create', 'edit', 'show']);
+                Route::resource('proveedores', ProveedorController::class)->except(['create', 'edit']);
                 Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])->name('proveedores.ranking');
                 Route::resource('unidades-medida',UnidadMedidaController::class)
                     ->except(['create','edit','show'])
