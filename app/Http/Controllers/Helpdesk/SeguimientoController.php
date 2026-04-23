@@ -10,15 +10,23 @@ use Illuminate\Support\Facades\Auth;
 
 class SeguimientoController extends Controller
 {
-    public function store(Request $request, Ticket $ticket)
-    {
+    public function store(Request $request, Ticket $ticket){
+        $ticket->load('tecnicos');
+        $user = Auth::user();
+
+        // Solo admin/coordinador o técnico asignado puede actualizar seguimiento
+        if (!$user->can('tickets.editar.todos')
+            && $ticket->user_id !== $user->id
+            && !$ticket->tecnicos->contains('id', $user->id)) {
+            abort(403);
+        }
+
         $request->validate([
             'estado'     => 'required|in:pendiente,en_atencion,en_desarrollo,en_pruebas,finalizado,escalado',
             'comentario' => 'nullable|string|max:1000',
             'resolucion' => 'nullable|string',
         ]);
 
-        // Registrar en historial
         TicketSeguimiento::create([
             'ticket_id'  => $ticket->id,
             'user_id'    => Auth::id(),
@@ -32,7 +40,6 @@ class SeguimientoController extends Controller
             $update['fecha_cierre'] = now();
             $update['resolucion']   = $request->resolucion;
 
-            // Notificar al solicitante
             try {
                 $ticket->solicitante->notify(new TicketCerradoNotificacion($ticket));
             } catch (\Exception $e) {

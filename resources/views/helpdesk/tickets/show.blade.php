@@ -262,57 +262,58 @@
                 </div>
             @endif
 
-            {{-- Actualizar seguimiento (solo admin/coordinador/auxiliar) --}}
-            @can('tickets.asignar')
-                @if($ticket->seguimiento !== 'finalizado')
-                    <div class="card card-info card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-sync mr-1"></i> Actualizar seguimiento
-                            </h3>
+            {{-- Actualizar seguimiento --}}
+{{-- Actualizar seguimiento --}}
+@if(auth()->user()->can('tickets.asignar') || $ticket->tecnicos->contains('id', auth()->id()))
+    @if($ticket->seguimiento !== 'finalizado')
+        <div class="card card-info card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-sync mr-1"></i> Actualizar seguimiento
+                </h3>
+            </div>
+            <form action="{{ route('helpdesk.tickets.seguimiento', $ticket) }}"
+                  method="POST">
+                @csrf
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nuevo estado</label>
+                                <select name="estado" class="form-control" required>
+                                    @foreach(Ticket::etiquetasSeguimiento() as $key => $label)
+                                        <option value="{{ $key }}"
+                                            {{ $ticket->seguimiento == $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                        <form action="{{ route('helpdesk.tickets.seguimiento', $ticket) }}"
-                              method="POST">
-                            @csrf
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nuevo estado</label>
-                                            <select name="estado" class="form-control" required>
-                                                @foreach(Ticket::etiquetasSeguimiento() as $key => $label)
-                                                    <option value="{{ $key }}"
-                                                        {{ $ticket->seguimiento == $key ? 'selected' : '' }}>
-                                                        {{ $label }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group" id="resolucion-group" style="display:none">
-                                            <label>Descripción de resolución</label>
-                                            <textarea name="resolucion" class="form-control"
-                                                      rows="2" placeholder="¿Cómo se resolvió?"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group mb-0">
-                                    <label>Comentario</label>
-                                    <input type="text" name="comentario"
-                                           class="form-control"
-                                           placeholder="Nota del seguimiento (opcional)">
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" id="resolucion-group" style="display:none">
+                                <label>Descripción de resolución</label>
+                                <textarea name="resolucion" class="form-control"
+                                          rows="2" placeholder="¿Cómo se resolvió?"></textarea>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-info btn-sm">
-                                    <i class="fas fa-save"></i> Guardar seguimiento
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                @endif
-            @endcan
+                    <div class="form-group mb-0">
+                        <label>Comentario</label>
+                        <input type="text" name="comentario"
+                               class="form-control"
+                               placeholder="Nota del seguimiento (opcional)">
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-info btn-sm">
+                        <i class="fas fa-save"></i> Guardar seguimiento
+                    </button>
+                </div>
+            </form>
+        </div>
+    @endif
+@endif
 
             {{-- Historial de seguimiento --}}
             <div class="card">

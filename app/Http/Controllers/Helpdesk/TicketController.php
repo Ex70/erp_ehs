@@ -14,20 +14,24 @@ use Spatie\Permission\Models\Role;
 
 class TicketController extends Controller
 {
-    public function index(Request $request)
-    {
-        // Administrador/coordinador ve todos — el resto solo los suyos
-        $query = Auth::user()->can('tickets.ver.todos')
-            ? Ticket::with(['solicitante.puesto', 'tipoFalla', 'categoriaServicio', 'tecnicos'])
-            : Ticket::with(['solicitante.puesto', 'tipoFalla', 'categoriaServicio', 'tecnicos'])
-                    ->where('user_id', Auth::id());
+    public function index(Request $request){
+        $user = Auth::user();
+
+        $query = Ticket::with(['solicitante.puesto', 'tipoFalla', 'categoriaServicio', 'tecnicos']);
+
+        if (!$user->can('tickets.ver.todos')) {
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                ->orWhereHas('tecnicos', fn($t) => $t->where('users.id', $user->id));
+            });
+        }
 
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
                 $q->where('folio', 'like', '%'.$request->q.'%')
-                  ->orWhereHas('solicitante', fn($u) =>
-                      $u->where('name', 'like', '%'.$request->q.'%')
-                  );
+                ->orWhereHas('solicitante', fn($u) =>
+                    $u->where('name', 'like', '%'.$request->q.'%')
+                );
             });
         }
 
@@ -123,11 +127,6 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        // Usuario solo puede ver sus propios tickets
-        if (!Auth::user()->can('tickets.ver.todos') && $ticket->user_id !== Auth::id()) {
-            abort(403);
-        }
-
         $ticket->load([
             'solicitante.puesto',
             'tipoFalla',
@@ -135,6 +134,14 @@ class TicketController extends Controller
             'tecnicos',
             'seguimientos.usuario',
         ]);
+
+        $user = Auth::user();
+
+        if (!$user->can('tickets.ver.todos') 
+            && $ticket->user_id !== $user->id 
+            && !$ticket->tecnicos->contains('id', $user->id)) {
+            abort(403);
+        }
 
         $tecnicos = User::role(['administrador', 'coordinador', 'auxiliar'])
                         ->where('activo', true)
@@ -150,8 +157,12 @@ class TicketController extends Controller
 
     public function edit(Ticket $ticket)
     {
-        // Solo admin puede editar cualquier ticket; usuario solo el suyo
-        if (!Auth::user()->can('tickets.editar.todos') && $ticket->user_id !== Auth::id()) {
+        $ticket->load('tecnicos');
+        $user = Auth::user();
+
+        if (!$user->can('tickets.editar.todos')
+            && $ticket->user_id !== $user->id
+            && !$ticket->tecnicos->contains('id', $user->id)) {
             abort(403);
         }
 
@@ -166,9 +177,13 @@ class TicketController extends Controller
         return view('helpdesk.tickets.edit', compact('ticket', 'tiposFalla', 'categorias'));
     }
 
-    public function update(Request $request, Ticket $ticket)
-    {
-        if (!Auth::user()->can('tickets.editar.todos') && $ticket->user_id !== Auth::id()) {
+    public function update(Request $request, Ticket $ticket){
+        $ticket->load('tecnicos');
+        $user = Auth::user();
+
+        if (!$user->can('tickets.editar.todos')
+            && $ticket->user_id !== $user->id
+            && !$ticket->tecnicos->contains('id', $user->id)) {
             abort(403);
         }
 
