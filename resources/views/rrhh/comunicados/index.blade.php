@@ -100,41 +100,55 @@
     </div>
 
     {{-- ══════════════════════════════════════════
-         MODAL: Ver comunicado
+                MODAL: Ver comunicado
     ══════════════════════════════════════════ --}}
     <div class="modal fade" id="modalVer" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" style="border-radius:16px; border:none;">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-weight-bold text-uppercase" id="verTitulo"></h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <div class="modal-header border-0 pb-0 pt-3 px-4">
+                    <h5 class="modal-title font-weight-bold text-uppercase"
+                        id="verTitulo" style="font-size:1rem; line-height:1.4;"></h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            style="font-size:1.2rem;">&times;</button>
                 </div>
-                <hr class="mx-3 mt-2">
-                <div class="modal-body pt-0">
-                    <small class="text-muted" id="verMeta"></small>
-                    <div class="mt-3" id="verContenido"></div>
+
+                <hr class="mx-4 mt-2 mb-0">
+
+                <div class="modal-body px-4 pt-2 pb-3">
+                    {{-- Meta: categoría · autor · fecha --}}
+                    <small id="verMeta" class="d-block mb-3" style="color:#999;"></small>
+
+                    {{-- Contenido --}}
+                    <div id="verContenido"
+                        style="font-size:.92rem; line-height:1.7; color:#333;"></div>
 
                     {{-- Archivo adjunto --}}
                     <div id="verArchivo" class="mt-3 d-none">
                         <a id="verArchivoLink" href="#" target="_blank"
-                           class="btn btn-sm btn-outline-secondary">
+                        class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-paperclip mr-1"></i> Ver adjunto
                         </a>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button class="btn btn-secondary btn-sm px-3"
+                            data-dismiss="modal">Cerrar</button>
                     @can('comunicados.editar')
-                        <button class="btn btn-warning btn-sm" id="btnEditarDesdeVer">
+                        <button class="btn btn-sm px-3 font-weight-bold" id="btnEditarDesdeVer"
+                                style="background:#f0ad4e;color:#fff;border:none;">
                             <i class="fas fa-pencil-alt mr-1"></i> Editar
                         </button>
                     @endcan
                     @can('comunicados.eliminar')
-                        <button class="btn btn-danger btn-sm" id="btnEliminarDesdeVer">
+                        <button class="btn btn-danger btn-sm px-3 font-weight-bold"
+                                id="btnEliminarDesdeVer">
                             <i class="fas fa-trash mr-1"></i> Eliminar
                         </button>
                     @endcan
                 </div>
+
             </div>
         </div>
     </div>
@@ -291,6 +305,7 @@
 const routeIndex    = "{{ route('rrhh.comunicados.index') }}";
 const routeStore    = "{{ route('rrhh.comunicados.store') }}";
 const routeDefaults = "{{ route('rrhh.comunicados.defaults') }}";
+const routeShow     = "{{ url('rrhh/comunicados') }}/"; // se concatena el ID
 
 // ── Filtros en tiempo real ─────────────────────────
 function aplicarFiltros() {
@@ -366,39 +381,42 @@ document.getElementById('btnGuardar').addEventListener('click', function () {
 
 // ── Ver comunicado (modal) ────────────────────────
 function verComunicado(id) {
-    fetch(`${routeIndex}/../${id}`)
-        .then(r => r.json())
-        .then(com => {
-            document.getElementById('verTitulo').textContent = com.titulo.toUpperCase();
-            document.getElementById('verMeta').textContent   =
-                `${com.categoria} · ${com.autor} · ${com.fecha_publicacion}`;
-            document.getElementById('verContenido').textContent =
-                com.contenido_completo ?? com.extracto ?? '';
+    fetch(routeShow + id, {
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(com => {
+        document.getElementById('verTitulo').textContent =
+            com.titulo.toUpperCase();
 
-            // Archivo adjunto
-            const archivoDiv  = document.getElementById('verArchivo');
-            const archivoLink = document.getElementById('verArchivoLink');
-            if (com.archivo) {
-                archivoLink.href = `/storage/${com.archivo}`;
-                archivoDiv.classList.remove('d-none');
-            } else {
-                archivoDiv.classList.add('d-none');
-            }
+        document.getElementById('verMeta').innerHTML =
+            `<span class="text-uppercase font-weight-bold" style="color:#C0392B;font-size:.75rem;">${com.categoria}</span>`
+            + ` &middot; <span>${com.autor}</span>`
+            + ` &middot; <span>${com.fecha_publicacion}</span>`;
 
-            // Botón Editar
-            const btnEditar = document.getElementById('btnEditarDesdeVer');
-            if (btnEditar) {
-                btnEditar.onclick = () => abrirEditar(com);
-            }
+        document.getElementById('verContenido').textContent =
+            com.contenido_completo ?? com.extracto ?? '';
 
-            // Botón Eliminar
-            const btnEliminar = document.getElementById('btnEliminarDesdeVer');
-            if (btnEliminar) {
-                btnEliminar.onclick = () => eliminarComunicado(com.id);
-            }
+        // Archivo adjunto
+        const archivoDiv  = document.getElementById('verArchivo');
+        const archivoLink = document.getElementById('verArchivoLink');
+        if (com.archivo) {
+            archivoLink.href = `/storage/${com.archivo}`;
+            archivoDiv.classList.remove('d-none');
+        } else {
+            archivoDiv.classList.add('d-none');
+        }
 
-            $('#modalVer').modal('show');
-        });
+        // Botones condicionales
+        const btnEditar   = document.getElementById('btnEditarDesdeVer');
+        const btnEliminar = document.getElementById('btnEliminarDesdeVer');
+
+        if (btnEditar)   btnEditar.onclick   = () => abrirEditar(com);
+        if (btnEliminar) btnEliminar.onclick = () => eliminarComunicado(com.id);
+
+        $('#modalVer').modal('show');
+    })
+    .catch(() => alert('No se pudo cargar el comunicado.'));
 }
 
 // ── Abrir modal en modo edición ───────────────────
@@ -406,28 +424,34 @@ function abrirEditar(com) {
     modoEdicion = true;
     idEdicion   = com.id;
 
-    const url = `${routeIndex}/${com.id}`;
-    document.getElementById('formComunicado').action = url;
+    document.getElementById('formComunicado').action = routeShow + com.id;
     document.getElementById('formMethod').value      = 'PUT';
+
     document.getElementById('modalPublicarTitulo').innerHTML =
         '<i class="fas fa-pencil-alt text-warning mr-2"></i> Editar Publicación';
     document.getElementById('btnGuardar').innerHTML =
         '<i class="fas fa-save mr-1"></i> Guardar cambios';
 
-    // Rellenar campos
     document.getElementById('fTitulo').value    = com.titulo;
     document.getElementById('fCategoria').value = com.categoria;
-    document.getElementById('fEmoji').value     = com.icono_emoji ?? '';
-    document.getElementById('fColor').value     = com.color_fondo ?? '#F3F4F6';
-    document.getElementById('colorPicker').value= com.color_fondo ?? '#F3F4F6';
-    document.getElementById('fFecha').value     = com.fecha_publicacion;
+    document.getElementById('fEmoji').value     = com.icono_emoji   ?? '';
+    document.getElementById('fColor').value     = com.color_fondo   ?? '#F3F4F6';
+    document.getElementById('colorPicker').value= com.color_fondo   ?? '#F3F4F6';
     document.getElementById('fAutor').value     = com.autor;
-    document.getElementById('fExtracto').value  = com.extracto ?? '';
+    document.getElementById('fExtracto').value  = com.extracto          ?? '';
     document.getElementById('fContenido').value = com.contenido_completo ?? '';
+
+    // ── Fecha: limpiar cualquier componente de hora ──
+    const fecha = com.fecha_publicacion
+        ? com.fecha_publicacion.toString().slice(0, 10)
+        : '';
+    document.getElementById('fFecha').value = fecha;
 
     if (com.archivo) {
         document.getElementById('archivoActualWrap').classList.remove('d-none');
         document.getElementById('archivoActualLink').href = `/storage/${com.archivo}`;
+    } else {
+        document.getElementById('archivoActualWrap').classList.add('d-none');
     }
 
     $('#modalVer').modal('hide');

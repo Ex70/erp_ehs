@@ -74,29 +74,37 @@ class ComunicadoController extends Controller
         $this->authorize('comunicados.editar');
 
         $data = $request->validate([
-            'titulo'            => 'required|string|max:255',
-            'categoria'         => 'required|in:' . implode(',', Comunicado::categorias()),
-            'icono_emoji'       => 'nullable|string|max:10',
-            'color_fondo'       => 'nullable|string|max:7',
-            'fecha_publicacion' => 'required|date',
-            'autor'             => 'required|string|max:100',
-            'extracto'          => 'nullable|string|max:500',
-            'contenido_completo'=> 'nullable|string',
-            'archivo'           => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf|max:5120',
+            'titulo'             => 'required|string|max:255',
+            'categoria'          => 'required|in:' . implode(',', Comunicado::categorias()),
+            'icono_emoji'        => 'nullable|string|max:10',
+            'color_fondo'        => 'nullable|string|max:7',
+            'fecha_publicacion' => 'nullable|date',
+            'autor'              => 'required|string|max:100',
+            'extracto'           => 'nullable|string|max:500',
+            'contenido_completo' => 'nullable|string',
+            'archivo'            => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf|max:5120',
         ]);
 
+        // Manejar archivo nuevo
         if ($request->hasFile('archivo')) {
-            // Eliminar archivo anterior
             if ($comunicado->archivo) {
                 Storage::disk('public')->delete($comunicado->archivo);
             }
-            $data['archivo'] = $request->file('archivo')
-                ->store('comunicados', 'public');
+            $data['archivo'] = $request->file('archivo')->store('comunicados', 'public');
+        } else {
+            // Conservar el archivo existente si no se subió uno nuevo
+            unset($data['archivo']);
+        }
+
+        // Si no llega fecha, conservar la existente
+        if (empty($data['fecha_publicacion'])) {
+            unset($data['fecha_publicacion']);
         }
 
         $comunicado->update($data);
 
-        return redirect()->route('rrhh.comunicados.index')->with('success', 'Comunicado actualizado correctamente.');
+        return redirect()->route('rrhh.comunicados.index')
+            ->with('success', 'Comunicado actualizado correctamente.');
     }
 
     public function destroy(Comunicado $comunicado)
