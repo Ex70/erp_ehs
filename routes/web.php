@@ -186,6 +186,17 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
              ->except(['create', 'edit', 'show']);
     });
 
+    // ── RRHH ──────────────────────────────────────────────
+    Route::prefix('rrhh')->name('rrhh.')->middleware(['auth'])->group(function () {
+
+        // Comunicados y Noticias
+        Route::resource('comunicados', \App\Http\Controllers\RRHH\ComunicadoController::class)
+            ->except(['create', 'edit']);
+        Route::get('comunicados/defaults', [\App\Http\Controllers\RRHH\ComunicadoController::class, 'defaults'])
+            ->name('comunicados.defaults');
+
+    });
+
 
     // Helpdesk — todos los autenticados pueden crear tickets
     Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function () {
