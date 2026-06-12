@@ -22,8 +22,7 @@ class ComunicadoController extends Controller
 
         if ($request->filled('buscar')) {
             $query->where(function ($q) use ($request) {
-                $q->where('titulo', 'like', '%' . $request->buscar . '%')
-                  ->orWhere('extracto', 'like', '%' . $request->buscar . '%');
+                $q->where('titulo', 'like', '%' . $request->buscar . '%')->orWhere('extracto', 'like', '%' . $request->buscar . '%');
             });
         }
 

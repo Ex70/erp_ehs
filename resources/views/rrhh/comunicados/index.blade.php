@@ -392,7 +392,7 @@ function verComunicado(id) {
         document.getElementById('verMeta').innerHTML =
             `<span class="text-uppercase font-weight-bold" style="color:#C0392B;font-size:.75rem;">${com.categoria}</span>`
             + ` &middot; <span>${com.autor}</span>`
-            + ` &middot; <span>${com.fecha_publicacion}</span>`;
+            + ` &middot; <span>${com.fecha_publicacion.toString().slice(0, 10)}</span>`;
 
         document.getElementById('verContenido').textContent =
             com.contenido_completo ?? com.extracto ?? '';
