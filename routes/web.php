@@ -36,6 +36,7 @@ use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
+// ─── Público ────────────────────────────────────────────────────────────────
 Route::get('/', function () {
     return view('welcome');
 });
@@ -45,29 +46,16 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 // Completar registro (enlace enviado por correo — acceso público)
-Route::get('/registro/completar/{token}', [RegistroController::class, 'completar'])->name('registro.completar');
-
+Route::get('/registro/completar/{token}',  [RegistroController::class, 'completar'])->name('registro.completar');
 Route::post('/registro/completar/{token}', [RegistroController::class, 'guardar'])->name('registro.guardar');
 
-Route::post('usuarios/{usuario}/reenviar-registro',
-    [UsuarioController::class, 'reenviarRegistro'])
-    ->name('usuarios.reenviar-registro')
-    ->middleware(['auth', 'role:administrador']);
 
-    Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
-    Route::resource('usuarios', UsuarioController::class);
-
-    // Eliminación permanente (solo usuarios inactivos)
-    Route::delete('usuarios/{usuario}/force-delete', [UsuarioController::class, 'forceDelete'])
-        ->name('usuarios.forceDelete');
-});
-
-// ─── Solo autenticados ────────────────────────────────────────────────────────
+// ─── Solo autenticados (todos los roles) ────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-         ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Perfil propio
     Route::prefix('perfil')->name('perfil.')->group(function () {
         Route::get('/',         [PerfilController::class, 'show'])           ->name('show');
         Route::get('/editar',   [PerfilController::class, 'edit'])           ->name('edit');
@@ -79,172 +67,149 @@ Route::middleware('auth')->group(function () {
 
 });
 
-// ─── Administrador y jefe de área ────────────────────────────────────────────
-Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
-    Route::resource('usuarios', UsuarioController::class);
-    Route::resource('puestos',  PuestoController::class);
-});
 
-// ─── Solo administrador ───────────────────────────────────────────────────────
-Route::middleware(['auth', 'role:administrador'])->group(function () {
+// ─── Helpdesk — todos los autenticados (cualquier rol) ──────────────────────
+Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function () {
 
-    // Route::resource('roles',    RolController::class);
-    Route::resource('roles', RolController::class)->parameters(['roles' => 'rol']);
-    Route::resource('permisos', PermisoController::class);
+    // Dashboard — solo quien tenga el permiso
+    Route::get('dashboard', [DashboardHelpdeskController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('can:tickets.dashboard');
 
-    // Módulo Sistemas — prefijo y nombre agrupados
-    Route::prefix('sistemas')->name('sistemas.')->group(function () {
+    // Tickets — cualquier usuario autenticado puede crear y ver los suyos
+    Route::resource('tickets', TicketController::class);
 
-        Route::resource('redes', AsignacionIpController::class)
-             ->parameters(['redes' => 'asignacion_ip']);
+    // Asignación — solo admin/coordinador (tienen tickets.asignar)
+    Route::post('tickets/{ticket}/asignar', [AsignacionController::class, 'store'])
+        ->name('tickets.asignar')
+        ->middleware('can:tickets.asignar');
 
-        Route::resource('dispositivos', DispositivoController::class)
-             ->except(['create', 'edit', 'show']);
+    // Seguimiento — admin/coordinador/auxiliar (tienen tickets.asignar)
+    Route::post('tickets/{ticket}/seguimiento', [SeguimientoController::class, 'store'])
+        ->name('tickets.seguimiento')
+        ->middleware('can:tickets.asignar');
 
-        Route::resource('marcas', MarcaController::class)
-             ->except(['create', 'edit', 'show']);
+    // Calificación — solicitante (sin restricción de permiso adicional)
+    Route::post('tickets/{ticket}/calificar', [CalificacionController::class, 'store'])
+        ->name('tickets.calificar');
+
+    // Catálogos — solo admin/coordinador
+    Route::middleware('role:administrador|coordinador')->group(function () {
+        Route::get('catalogos', [CatalogoHelpdeskController::class, 'index'])
+            ->name('catalogos.index');
+        Route::post('catalogos/tipos-falla', [CatalogoHelpdeskController::class, 'storeTipo'])
+            ->name('catalogos.tipos.store');
+        Route::put('catalogos/tipos-falla/{tipoFalla}', [CatalogoHelpdeskController::class, 'updateTipo'])
+            ->name('catalogos.tipos.update');
+        Route::post('catalogos/categorias', [CatalogoHelpdeskController::class, 'storeCategoria'])
+            ->name('catalogos.categorias.store');
+        Route::put('catalogos/categorias/{categoriaServicio}', [CatalogoHelpdeskController::class, 'updateCategoria'])
+            ->name('catalogos.categorias.update');
     });
 
-    // Adquisiciones — acceso por rol
-        Route::middleware(['auth', 'role:administrador|coordinador|auxiliar'])
-            ->prefix('adquisiciones')
-            ->name('adquisiciones.')
-            ->group(function () {
-
-                // Requerimientos
-                Route::resource('requerimientos', RequerimientoController::class);
-
-                // Adjudicación
-                Route::post('requerimientos/{requerimiento}/adjudicar',
-                    [AdjudicacionController::class, 'store'])
-                    ->name('requerimientos.adjudicar');
-
-                // Notas
-                Route::post('requerimientos/{requerimiento}/notas',
-                    [NotaController::class, 'store'])
-                    ->name('requerimientos.notas.store');
-                Route::delete('notas/{nota}',
-                    [NotaController::class, 'destroy'])
-                    ->name('notas.destroy');
-
-                // Catálogos
-                Route::resource('clientes',ClienteController::class)->except(['create','edit','show']);
-                Route::resource('empresas',EmpresaController::class)->except(['create','edit','show']);
-                Route::resource('proveedores', ProveedorController::class)->except(['create', 'edit']);
-                Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])->name('proveedores.ranking');
-                Route::resource('unidades-medida',UnidadMedidaController::class)
-                    ->except(['create','edit','show'])
-                    ->parameters(['unidades-medida' => 'unidad_medida']);
-
-                    Route::get('catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
-
-                // Destinatarios
-                Route::resource('destinatarios', DestinatarioController::class)
-                    ->except(['create', 'edit', 'show']);
-
-                // Catálogo de dependencias
-                Route::resource('dependencias', DependenciaController::class)
-                    ->except(['create', 'edit', 'show']);
-
-                // Productos y servicios frecuentes
-                Route::resource('productos', ProductoController::class);
-
-                // Catálogo de categorías
-                Route::resource('categorias-producto', CategoriaProductoController::class)
-                    ->except(['create', 'edit', 'show']);
-            });
+});
 
 
-    Route::middleware(['auth', 'role:administrador|coordinador|auxiliar'])
-    ->prefix('solvencias')
-    ->name('solvencias.')
-    ->group(function () {
+// ─── RRHH — todos los autenticados (cualquier rol) ──────────────────────────
+Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
+
+    // Comunicados y Noticias — la autorización por rol va en el controlador
+    Route::resource('comunicados', \App\Http\Controllers\RRHH\ComunicadoController::class)
+        ->except(['create', 'edit']);
+    Route::get('comunicados/defaults', [\App\Http\Controllers\RRHH\ComunicadoController::class, 'defaults'])
+        ->name('comunicados.defaults');
+
+});
+
+
+// ─── Administrador y jefe de área ───────────────────────────────────────────
+Route::middleware(['auth', 'role:administrador|jefe_area'])->group(function () {
+
+    Route::resource('usuarios', UsuarioController::class);
+    Route::delete('usuarios/{usuario}/force-delete', [UsuarioController::class, 'forceDelete'])
+        ->name('usuarios.forceDelete');
+    Route::post('usuarios/{usuario}/reenviar-registro', [UsuarioController::class, 'reenviarRegistro'])
+        ->name('usuarios.reenviar-registro');
+
+    Route::resource('puestos', PuestoController::class);
+
+});
+
+
+// ─── Administrador, coordinador y auxiliar ──────────────────────────────────
+Route::middleware(['auth', 'role:administrador|coordinador|auxiliar'])->group(function () {
+
+    // Adquisiciones
+    Route::prefix('adquisiciones')->name('adquisiciones.')->group(function () {
+
+        Route::resource('requerimientos', RequerimientoController::class);
+
+        Route::post('requerimientos/{requerimiento}/adjudicar',
+            [AdjudicacionController::class, 'store'])
+            ->name('requerimientos.adjudicar');
+
+        Route::post('requerimientos/{requerimiento}/notas',
+            [NotaController::class, 'store'])
+            ->name('requerimientos.notas.store');
+
+        Route::delete('notas/{nota}',
+            [NotaController::class, 'destroy'])
+            ->name('notas.destroy');
+
+        Route::resource('clientes',       ClienteController::class)->except(['create', 'edit', 'show']);
+        Route::resource('empresas',       EmpresaController::class)->except(['create', 'edit', 'show']);
+        Route::resource('proveedores',    ProveedorController::class)->except(['create', 'edit']);
+        Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])->name('proveedores.ranking');
+
+        Route::resource('unidades-medida', UnidadMedidaController::class)
+            ->except(['create', 'edit', 'show'])
+            ->parameters(['unidades-medida' => 'unidad_medida']);
+
+        Route::get('catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
+
+        Route::resource('destinatarios', DestinatarioController::class)
+            ->except(['create', 'edit', 'show']);
+
+        Route::resource('dependencias', DependenciaController::class)
+            ->except(['create', 'edit', 'show']);
+
+        Route::resource('productos', ProductoController::class);
+
+        Route::resource('categorias-producto', CategoriaProductoController::class)
+            ->except(['create', 'edit', 'show']);
+    });
+
+    // Solvencias
+    Route::prefix('solvencias')->name('solvencias.')->group(function () {
 
         Route::resource('/', SolvenciaController::class)
-             ->parameters(['' => 'solvencia'])
-             ->names([
-                 'index'   => 'solvencias.index',
-                 'create'  => 'solvencias.create',
-                 'store'   => 'solvencias.store',
-                 'show'    => 'solvencias.show',
-                 'edit'    => 'solvencias.edit',
-                 'update'  => 'solvencias.update',
-                 'destroy' => 'solvencias.destroy',
-             ]);
+            ->parameters(['' => 'solvencia'])
+            ->names([
+                'index'   => 'solvencias.index',
+                'create'  => 'solvencias.create',
+                'store'   => 'solvencias.store',
+                'show'    => 'solvencias.show',
+                'edit'    => 'solvencias.edit',
+                'update'  => 'solvencias.update',
+                'destroy' => 'solvencias.destroy',
+            ]);
 
-        Route::get('{solvencia}/pdf',
-            [SolvenciaPdfController::class, 'generar'])
+        Route::get('{solvencia}/pdf', [SolvenciaPdfController::class, 'generar'])
             ->name('pdf');
 
-        // API: cuentas por proveedor (usa tabla proveedores existente)
         Route::get('api/proveedor/{proveedor}/cuentas',
             [CuentaBancariaController::class, 'porProveedor'])
             ->name('api.cuentas');
 
-        // Empresas internas
         Route::resource('empresas', EmpresaSolvenciaController::class)
-             ->except(['create', 'edit', 'show']);
+            ->except(['create', 'edit', 'show']);
     });
 
-    // ── RRHH ──────────────────────────────────────────────
-    Route::prefix('rrhh')->name('rrhh.')->middleware(['auth'])->group(function () {
-
-        // Comunicados y Noticias
-        Route::resource('comunicados', \App\Http\Controllers\RRHH\ComunicadoController::class)
-            ->except(['create', 'edit']);
-        Route::get('comunicados/defaults', [\App\Http\Controllers\RRHH\ComunicadoController::class, 'defaults'])
-            ->name('comunicados.defaults');
-
-    });
-
-
-    // Helpdesk — todos los autenticados pueden crear tickets
-    Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function () {
-
-        // Dashboard — solo admin/coordinador/auxiliar
-        Route::get('dashboard', [DashboardHelpdeskController::class, 'index'])
-            ->name('dashboard')
-            ->middleware('can:tickets.dashboard');
-
-        // Tickets
-        Route::resource('tickets', TicketController::class);
-
-        // Asignación — solo admin/coordinador
-        Route::post('tickets/{ticket}/asignar', [AsignacionController::class, 'store'])
-            ->name('tickets.asignar')
-            ->middleware('can:tickets.asignar');
-
-        // Seguimiento — admin/coordinador/auxiliar
-        Route::post('tickets/{ticket}/seguimiento', [SeguimientoController::class, 'store'])
-            ->name('tickets.seguimiento')
-            ->middleware('can:tickets.asignar');
-
-        // Calificación — solicitante
-        Route::post('tickets/{ticket}/calificar', [CalificacionController::class, 'store'])
-            ->name('tickets.calificar');
-
-        // Catálogos — solo admin
-        Route::middleware('role:administrador|coordinador')->group(function () {
-            Route::get('catalogos', [CatalogoHelpdeskController::class, 'index'])
-                ->name('catalogos.index');
-            Route::post('catalogos/tipos-falla', [CatalogoHelpdeskController::class, 'storeTipo'])
-                ->name('catalogos.tipos.store');
-            Route::put('catalogos/tipos-falla/{tipoFalla}', [CatalogoHelpdeskController::class, 'updateTipo'])
-                ->name('catalogos.tipos.update');
-            Route::post('catalogos/categorias', [CatalogoHelpdeskController::class, 'storeCategoria'])
-                ->name('catalogos.categorias.store');
-            Route::put('catalogos/categorias/{categoriaServicio}', [CatalogoHelpdeskController::class, 'updateCategoria'])
-                ->name('catalogos.categorias.update');
-        });
-
-    });
-
-    // API cuentas bancarias por proveedor (para solvencias)
+    // API cuentas bancarias por proveedor
     Route::get('api/proveedor/{proveedor}/cuentas',
         [CuentaBancariaProveedorController::class, 'porProveedor'])
         ->name('api.cuentas');
 
-    // CRUD cuentas bancarias desde proveedor
     Route::post('proveedores/{proveedor}/cuentas',
         [CuentaBancariaProveedorController::class, 'store'])
         ->name('proveedores.cuentas.store');
@@ -252,5 +217,29 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::delete('cuentas/{cuenta}',
         [CuentaBancariaProveedorController::class, 'destroy'])
         ->name('proveedores.cuentas.destroy');
+
+});
+
+
+// ─── Solo administrador ─────────────────────────────────────────────────────
+Route::middleware(['auth', 'role:administrador'])->group(function () {
+
+    Route::resource('roles', RolController::class)
+        ->parameters(['roles' => 'rol']);
+
+    Route::resource('permisos', PermisoController::class);
+
+    // Módulo Sistemas
+    Route::prefix('sistemas')->name('sistemas.')->group(function () {
+
+        Route::resource('redes', AsignacionIpController::class)
+            ->parameters(['redes' => 'asignacion_ip']);
+
+        Route::resource('dispositivos', DispositivoController::class)
+            ->except(['create', 'edit', 'show']);
+
+        Route::resource('marcas', MarcaController::class)
+            ->except(['create', 'edit', 'show']);
+    });
 
 });
