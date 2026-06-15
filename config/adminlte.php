@@ -495,6 +495,18 @@ return [
             'can'     => 'tickets.asignar',
             'active'  => ['helpdesk/catalogos*'],
         ],
+        [
+            'text'    => 'RRHH',
+            'icon'    => 'fas fa-users',
+            'submenu' => [
+                [
+                    'text' => 'Comunicados y Noticias',
+                    'url'  => 'rrhh/comunicados',
+                    'icon' => 'fas fa-bullhorn',
+                    'can'  => 'comunicados.ver',
+                ],
+            ],
+        ],
         // Sidebar items:
         [
             'type' => 'sidebar-menu-search',
