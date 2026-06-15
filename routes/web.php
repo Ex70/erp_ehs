@@ -242,4 +242,6 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
             ->except(['create', 'edit', 'show']);
     });
 
+    
+
 });
