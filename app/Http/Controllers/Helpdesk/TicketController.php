@@ -7,6 +7,7 @@ use App\Models\TipoFalla;
 use App\Models\CategoriaServicio;
 use App\Models\User;
 use App\Notifications\NuevoTicketNotificacion;
+use App\Traits\NotificaTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,10 @@ use Spatie\Permission\Models\Role;
 
 class TicketController extends Controller
 {
-    public function index(Request $request){
+    use NotificaTicket;
+
+    public function index(Request $request)
+    {
         $user = Auth::user();
 
         $query = Ticket::with(['solicitante.puesto', 'tipoFalla', 'categoriaServicio', 'tecnicos']);
@@ -22,16 +26,16 @@ class TicketController extends Controller
         if (!$user->can('tickets.ver.todos')) {
             $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                ->orWhereHas('tecnicos', fn($t) => $t->where('users.id', $user->id));
+                  ->orWhereHas('tecnicos', fn($t) => $t->where('users.id', $user->id));
             });
         }
 
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
                 $q->where('folio', 'like', '%'.$request->q.'%')
-                ->orWhereHas('solicitante', fn($u) =>
-                    $u->where('name', 'like', '%'.$request->q.'%')
-                );
+                  ->orWhereHas('solicitante', fn($u) =>
+                      $u->where('name', 'like', '%'.$request->q.'%')
+                  );
             });
         }
 
@@ -57,9 +61,7 @@ class TicketController extends Controller
         $tiposFalla = TipoFalla::where('activo', true)->get();
         $estatuses  = Ticket::etiquetasSeguimiento();
 
-        return view('helpdesk.tickets.index', compact(
-            'tickets', 'tiposFalla', 'estatuses'
-        ));
+        return view('helpdesk.tickets.index', compact('tickets', 'tiposFalla', 'estatuses'));
     }
 
     public function create()
@@ -68,9 +70,7 @@ class TicketController extends Controller
         $tiposFalla = TipoFalla::where('activo', true)->orderBy('nombre')->get();
         $categorias = CategoriaServicio::where('activo', true)->orderBy('nombre')->get();
 
-        return view('helpdesk.tickets.create', compact(
-            'usuario', 'tiposFalla', 'categorias'
-        ));
+        return view('helpdesk.tickets.create', compact('usuario', 'tiposFalla', 'categorias'));
     }
 
     public function store(Request $request)
@@ -82,11 +82,11 @@ class TicketController extends Controller
             'descripcion'          => 'required|string|min:10',
             'evidencia'            => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ], [
-            'tipo_falla_id.required'   => 'El tipo de falla es obligatorio.',
-            'prioridad.required'       => 'La prioridad es obligatoria.',
-            'descripcion.required'     => 'La descripción es obligatoria.',
-            'descripcion.min'          => 'La descripción debe tener al menos 10 caracteres.',
-            'evidencia.max'            => 'El archivo no debe superar 5MB.',
+            'tipo_falla_id.required' => 'El tipo de falla es obligatorio.',
+            'prioridad.required'     => 'La prioridad es obligatoria.',
+            'descripcion.required'   => 'La descripción es obligatoria.',
+            'descripcion.min'        => 'La descripción debe tener al menos 10 caracteres.',
+            'evidencia.max'          => 'El archivo no debe superar 5MB.',
         ]);
 
         $data = [
@@ -137,22 +137,20 @@ class TicketController extends Controller
 
         $user = Auth::user();
 
-        if (!$user->can('tickets.ver.todos') 
-            && $ticket->user_id !== $user->id 
+        if (!$user->can('tickets.ver.todos')
+            && $ticket->user_id !== $user->id
             && !$ticket->tecnicos->contains('id', $user->id)) {
             abort(403);
         }
 
-        $tecnicos = User::role(['administrador', 'coordinador', 'auxiliar'])
-                        ->where('activo', true)
-                        ->orderBy('name')
-                        ->get();
+        $tecnicos  = User::role(['administrador', 'coordinador', 'auxiliar'])
+                         ->where('activo', true)
+                         ->orderBy('name')
+                         ->get();
 
         $estatuses = Ticket::etiquetasSeguimiento();
 
-        return view('helpdesk.tickets.show', compact(
-            'ticket', 'tecnicos', 'estatuses'
-        ));
+        return view('helpdesk.tickets.show', compact('ticket', 'tecnicos', 'estatuses'));
     }
 
     public function edit(Ticket $ticket)
@@ -166,8 +164,7 @@ class TicketController extends Controller
             abort(403);
         }
 
-        // No se puede editar un ticket ya finalizado (solo admin)
-        if ($ticket->seguimiento === 'finalizado' && !Auth::user()->can('tickets.editar.todos')) {
+        if ($ticket->seguimiento === 'finalizado' && !$user->can('tickets.editar.todos')) {
             return back()->with('error', 'No puedes editar un ticket ya finalizado.');
         }
 
@@ -177,7 +174,8 @@ class TicketController extends Controller
         return view('helpdesk.tickets.edit', compact('ticket', 'tiposFalla', 'categorias'));
     }
 
-    public function update(Request $request, Ticket $ticket){
+    public function update(Request $request, Ticket $ticket)
+    {
         $ticket->load('tecnicos');
         $user = Auth::user();
 
@@ -202,29 +200,45 @@ class TicketController extends Controller
             'descripcion'           => $request->descripcion,
         ];
 
-        // Solo admin puede cambiar el seguimiento
-        if (Auth::user()->can('tickets.editar.todos') && $request->filled('seguimiento')) {
+        // Solo admin/coordinador puede cambiar el seguimiento
+        if ($user->can('tickets.editar.todos') && $request->filled('seguimiento')) {
+            $estadoAnterior      = $ticket->seguimiento;
             $data['seguimiento'] = $request->seguimiento;
 
             if ($request->seguimiento === 'finalizado') {
                 $data['fecha_cierre'] = now();
                 $data['resolucion']   = $request->resolucion;
-
-                // Notificar al solicitante
-                try {
-                    $ticket->solicitante->notify(new \App\Notifications\TicketCerradoNotificacion($ticket));
-                } catch (\Exception $e) {
-                    logger()->error('Error notificando cierre: ' . $e->getMessage());
-                }
             }
+
+            $ticket->update($data);
+
+            // Notificar si el estado cambió
+            if ($estadoAnterior !== $request->seguimiento) {
+                $etiquetas     = Ticket::etiquetasSeguimiento();
+                $etiquetaNueva = $etiquetas[$request->seguimiento] ?? $request->seguimiento;
+
+                $this->notificarActualizacionTicket(
+                    $ticket->fresh(),
+                    'estado',
+                    "El estado del ticket {$ticket->folio} cambió a: {$etiquetaNueva}."
+                );
+            }
+
+            if ($request->hasFile('evidencia')) {
+                if ($ticket->evidencia) Storage::disk('public')->delete($ticket->evidencia);
+                $ticket->update([
+                    'evidencia' => $request->file('evidencia')->store('helpdesk/evidencias', 'public')
+                ]);
+            }
+
+            return redirect()
+                ->route('helpdesk.tickets.show', $ticket)
+                ->with('success', 'Ticket actualizado correctamente.');
         }
 
         if ($request->hasFile('evidencia')) {
-            if ($ticket->evidencia) {
-                Storage::disk('public')->delete($ticket->evidencia);
-            }
-            $data['evidencia'] = $request->file('evidencia')
-                                         ->store('helpdesk/evidencias', 'public');
+            if ($ticket->evidencia) Storage::disk('public')->delete($ticket->evidencia);
+            $data['evidencia'] = $request->file('evidencia')->store('helpdesk/evidencias', 'public');
         }
 
         $ticket->update($data);

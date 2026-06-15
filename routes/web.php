@@ -65,6 +65,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/avatar',[PerfilController::class, 'eliminarAvatar']) ->name('avatar.eliminar');
     });
 
+    Route::prefix('notificaciones')->name('notificaciones.')->middleware('auth')->group(function () {
+        Route::post('{id}/leer',   [App\Http\Controllers\NotificacionController::class, 'leer'])
+            ->name('leer');
+        Route::post('leer-todas',  [App\Http\Controllers\NotificacionController::class, 'leerTodas'])
+            ->name('leer-todas');
+    });
+
 });
 
 
