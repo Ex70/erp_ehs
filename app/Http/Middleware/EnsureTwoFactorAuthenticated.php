@@ -16,7 +16,6 @@ class EnsureTwoFactorAuthenticated
             $user->two_factor_enabled &&
             ! $request->session()->get('auth.two_factor_confirmed')
         ) {
-            // Guardar URL destino original
             if (! $request->is('two-factor*')) {
                 $request->session()->put('url.intended', $request->url());
                 return redirect()->route('two-factor.challenge');
