@@ -211,6 +211,39 @@
                 </form>
             </div>
 
+            <div class="card card-outline card-warning">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-shield-alt mr-2"></i>Seguridad de la cuenta del usuario</h3>
+    </div>
+    <div class="card-body">
+        @if(auth()->user()->two_factor_enabled)
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="badge badge-success mr-2"><i class="fas fa-check"></i> Activo</span>
+                    <strong>Autenticación de dos factores activada</strong>
+                    <br>
+                    <small class="text-muted">Activada el {{ auth()->user()->two_factor_confirmed_at->format('d/m/Y H:i') }}</small>
+                </div>
+                <a href="{{ route('two-factor.setup') }}" class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-cog mr-1"></i>Administrar
+                </a>
+            </div>
+        @else
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="badge badge-secondary mr-2"><i class="fas fa-times"></i> Inactivo</span>
+                    <strong>Autenticación de dos factores</strong>
+                    <br>
+                    <small class="text-muted">Protege tu cuenta con un segundo factor de verificación</small>
+                </div>
+                <a href="{{ route('two-factor.setup') }}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-shield-alt mr-1"></i>Activar 2FA
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
+
             {{-- Permisos del usuario --}}
             <div class="card">
                 <div class="card-header">
