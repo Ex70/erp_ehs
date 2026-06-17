@@ -31,14 +31,6 @@
                 <div class="text-center mb-4">
                     {!! \BaconQrCode\Renderer\ImageRenderer::class ? '' : '' !!}
                     {{-- QR generado con bacon/bacon-qr-code --}}
-                    @php
-                        $renderer = new \BaconQrCode\Renderer\ImageRenderer(
-                            new \BaconQrCode\Renderer\RendererStyle\RendererStyle(200),
-                            new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
-                        );
-                        $writer = new \BaconQrCode\Writer($renderer);
-                        $qrSvg  = $writer->writeString($qrUrl);
-                    @endphp
                     {!! $qrSvg !!}
                 </div>
 
