@@ -13,6 +13,7 @@ use App\Http\Controllers\Adquisiciones\ProductoController;
 use App\Http\Controllers\Adquisiciones\ProveedorController;
 use App\Http\Controllers\Adquisiciones\RequerimientoController;
 use App\Http\Controllers\Adquisiciones\UnidadMedidaController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Helpdesk\AsignacionController;
 use App\Http\Controllers\Helpdesk\CalificacionController;
@@ -35,6 +36,7 @@ use App\Http\Controllers\Solvencias\SolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\TwoFactorController;
 
 // ─── Público ────────────────────────────────────────────────────────────────
 Route::get('/', function () {
@@ -52,6 +54,13 @@ Route::post('/registro/completar/{token}', [RegistroController::class, 'guardar'
 
 // ─── Solo autenticados (todos los roles) ────────────────────────────────────
 Route::middleware('auth')->group(function () {
+
+// ── Two-Factor Authentication ──────────────────────────────
+Route::get('/two-factor/challenge',  [TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
+Route::post('/two-factor/verify',    [TwoFactorController::class, 'verify'])->name('two-factor.verify');
+Route::get('/two-factor/setup',      [TwoFactorController::class, 'setup'])->name('two-factor.setup');
+Route::post('/two-factor/enable',    [TwoFactorController::class, 'enable'])->name('two-factor.enable');
+Route::post('/two-factor/disable',   [TwoFactorController::class, 'disable'])->name('two-factor.disable');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
