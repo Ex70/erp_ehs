@@ -7,6 +7,7 @@ use App\Models\TipoFalla;
 use App\Models\CategoriaServicio;
 use App\Models\User;
 use App\Notifications\NuevoTicketNotificacion;
+use App\Traits\NotificaTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,7 @@ use Spatie\Permission\Models\Role;
 
 class TicketController extends Controller
 {
+    use NotificaTicket;
     public function index(Request $request)
     {
         // Administrador/coordinador ve todos — el resto solo los suyos
