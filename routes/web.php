@@ -36,7 +36,6 @@ use App\Http\Controllers\Solvencias\SolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\TwoFactorController;
 
 // ─── Público ────────────────────────────────────────────────────────────────
 Route::get('/', function () {

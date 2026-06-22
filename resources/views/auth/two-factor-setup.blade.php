@@ -31,15 +31,7 @@
                 <div class="text-center mb-4">
                     {!! \BaconQrCode\Renderer\ImageRenderer::class ? '' : '' !!}
                     {{-- QR generado con bacon/bacon-qr-code --}}
-                    @php
-                        $renderer = new \BaconQrCode\Renderer\ImageRenderer(
-                            new \BaconQrCode\Renderer\RendererStyle\RendererStyle(200),
-                            new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
-                        );
-                        $writer = new \BaconQrCode\Writer($renderer);
-                        $qrSvg  = $writer->writeString($qrUrl);
-                    @endphp
-                    {!! $qrSvg !!}
+                   {!! $qrSvg !!}
                 </div>
 
                 <p class="text-center text-muted mb-4">
@@ -101,7 +93,7 @@
         </div>
         @endif
 
-        <a href="{{ route('profile') }}" class="btn btn-secondary">
+        <a href="{{ route('perfil.show') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left mr-1"></i>Volver al perfil
         </a>
     </div>

@@ -222,7 +222,7 @@
                     <span class="badge badge-success mr-2"><i class="fas fa-check"></i> Activo</span>
                     <strong>Autenticación de dos factores activada</strong>
                     <br>
-                    <small class="text-muted">Activada el {{ auth()->user()->two_factor_confirmed_at->format('d/m/Y H:i') }}</small>
+                    <small class="text-muted">Activada el {{ \Carbon\Carbon::parse(auth()->user()->two_factor_confirmed_at)->format('d/m/Y H:i') }}</small>
                 </div>
                 <a href="{{ route('two-factor.setup') }}" class="btn btn-outline-warning btn-sm">
                     <i class="fas fa-cog mr-1"></i>Administrar

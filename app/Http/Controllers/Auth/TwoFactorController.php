@@ -12,23 +12,30 @@ class TwoFactorController extends Controller
      * Mostrar pantalla de configuración 2FA (en perfil de usuario).
      */
     public function setup(Request $request)
-    {
-        $user   = $request->user();
-        $google = new Google2FA();
+{
+    $user   = $request->user();
+    $google = new Google2FA();
 
-        if (! $user->two_factor_secret) {
-            $user->two_factor_secret = $google->generateSecretKey();
-            $user->save();
-        }
-
-        $qrUrl = $google->getQRCodeUrl(
-            config('app.name'),
-            $user->email,
-            $user->two_factor_secret
-        );
-
-        return view('auth.two-factor-setup', compact('user', 'qrUrl'));
+    if (! $user->two_factor_secret) {
+        $user->two_factor_secret = $google->generateSecretKey();
+        $user->save();
     }
+
+    $qrUrl = $google->getQRCodeUrl(
+        config('app.name'),
+        $user->email,
+        $user->two_factor_secret
+    );
+
+    $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+        new \BaconQrCode\Renderer\RendererStyle\RendererStyle(200),
+        new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+    );
+    $writer = new \BaconQrCode\Writer($renderer);
+    $qrSvg  = $writer->writeString($qrUrl);
+
+    return view('auth.two-factor-setup', compact('user', 'qrUrl', 'qrSvg'));
+}
 
     /**
      * Activar 2FA tras escanear el QR y confirmar primer código.
@@ -50,7 +57,8 @@ class TwoFactorController extends Controller
         $user->two_factor_confirmed_at = now();
         $user->save();
 
-        return redirect()->route('profile')->with('success', 'Autenticación de dos factores activada correctamente.');
+        return redirect()->route('perfil.show')->with('success', 'Autenticación de dos factores activada correctamente.');
+
     }
 
     /**
@@ -66,7 +74,8 @@ class TwoFactorController extends Controller
         $user->two_factor_secret       = null;
         $user->save();
 
-        return redirect()->route('profile')->with('success', 'Autenticación de dos factores desactivada.');
+        return redirect()->route('perfil.show')->with('success', 'Autenticación de dos factores desactivada.');
+
     }
 
     /**
