@@ -168,7 +168,12 @@ class TicketController extends Controller
 
     public function update(Request $request, Ticket $ticket)
     {
-        if (!Auth::user()->can('tickets.editar.todos') && $ticket->user_id !== Auth::id()) {
+        $ticket->load('tecnicos');
+        $user = Auth::user();
+
+        if (!$user->can('tickets.editar.todos')
+            && $ticket->user_id !== $user->id
+            && !$ticket->tecnicos->contains('id', $user->id)) {
             abort(403);
         }
 
@@ -187,32 +192,67 @@ class TicketController extends Controller
             'descripcion'           => $request->descripcion,
         ];
 
-        // Solo admin puede cambiar el seguimiento
-        if (Auth::user()->can('tickets.editar.todos') && $request->filled('seguimiento')) {
+        // Solo admin/coordinador puede cambiar el seguimiento
+        if ($user->can('tickets.editar.todos') && $request->filled('seguimiento')) {
+            $estadoAnterior      = $ticket->seguimiento;
             $data['seguimiento'] = $request->seguimiento;
 
             if ($request->seguimiento === 'finalizado') {
                 $data['fecha_cierre'] = now();
                 $data['resolucion']   = $request->resolucion;
-
-                // Notificar al solicitante
-                try {
-                    $ticket->solicitante->notify(new \App\Notifications\TicketCerradoNotificacion($ticket));
-                } catch (\Exception $e) {
-                    logger()->error('Error notificando cierre: ' . $e->getMessage());
-                }
             }
+
+            $ticket->update($data);
+
+            if ($estadoAnterior !== $request->seguimiento) {
+                // Cambió el estado: notificar a solicitante + jefes
+                $etiquetas     = Ticket::etiquetasSeguimiento();
+                $etiquetaNueva = $etiquetas[$request->seguimiento] ?? $request->seguimiento;
+
+                $this->notificarActualizacionTicket(
+                    $ticket->fresh(),
+                    'estado',
+                    "El estado del ticket {$ticket->folio} cambió a: {$etiquetaNueva}."
+                );
+            } else {
+                // No cambió el estado, pero sí otros datos: avisar solo al solicitante
+                $this->notificarActualizacionTicket(
+                    $ticket->fresh(),
+                    'edicion',
+                    "Se actualizó información del ticket {$ticket->folio}.",
+                    incluirJefes: false
+                );
+            }
+
+            if ($request->hasFile('evidencia')) {
+                if ($ticket->evidencia) Storage::disk('public')->delete($ticket->evidencia);
+                $ticket->update([
+                    'evidencia' => $request->file('evidencia')->store('helpdesk/evidencias', 'public')
+                ]);
+            }
+
+            return redirect()
+                ->route('helpdesk.tickets.show', $ticket)
+                ->with('success', 'Ticket actualizado correctamente.');
         }
 
         if ($request->hasFile('evidencia')) {
-            if ($ticket->evidencia) {
-                Storage::disk('public')->delete($ticket->evidencia);
-            }
-            $data['evidencia'] = $request->file('evidencia')
-                                         ->store('helpdesk/evidencias', 'public');
+            if ($ticket->evidencia) Storage::disk('public')->delete($ticket->evidencia);
+            $data['evidencia'] = $request->file('evidencia')->store('helpdesk/evidencias', 'public');
         }
 
         $ticket->update($data);
+
+        // Edición hecha por el técnico asignado (o por el propio solicitante):
+        // si quien edita es el técnico, avisar solo al solicitante.
+        if ($ticket->tecnicos->contains('id', $user->id)) {
+            $this->notificarActualizacionTicket(
+                $ticket->fresh(),
+                'edicion',
+                "El técnico asignado actualizó información del ticket {$ticket->folio}.",
+                incluirJefes: false
+            );
+        }
 
         return redirect()
             ->route('helpdesk.tickets.show', $ticket)
