@@ -5,11 +5,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\TicketSeguimiento;
 use App\Notifications\TicketCerradoNotificacion;
+use App\Traits\NotificaTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SeguimientoController extends Controller
 {
+    use NotificaTicket;
+
     public function store(Request $request, Ticket $ticket)
     {
         $request->validate([
@@ -38,6 +41,16 @@ class SeguimientoController extends Controller
             } catch (\Exception $e) {
                 logger()->error('Error notificando cierre: ' . $e->getMessage());
             }
+        } else {
+            // Nuevo seguimiento/comentario (sin cerrar): avisar solo al solicitante
+            $this->notificarActualizacionTicket(
+                $ticket->fresh(),
+                'seguimiento',
+                $request->filled('comentario')
+                    ? "Nuevo comentario en el ticket {$ticket->folio}: " . \Str::limit($request->comentario, 100)
+                    : "Hay una actualización de seguimiento en el ticket {$ticket->folio}.",
+                incluirJefes: false
+            );
         }
 
         $ticket->update($update);
