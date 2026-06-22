@@ -103,7 +103,7 @@ class TicketController extends Controller
         $ticket = Ticket::create($data);
 
         // Notificar al jefe de sistemas (rol coordinador + administrador)
-        $jefes = User::role(['administrador', 'coordinador'])
+        $jefes = User::role(['administrador'])
                      ->where('activo', true)
                      ->where('id', '!=', Auth::id())
                      ->get();
