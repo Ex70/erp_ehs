@@ -113,6 +113,15 @@
                             autocomplete="current-password"
                             required
                         >
+                        <span class="toggle-password" onclick="togglePassword('password', this)" style="
+                            position: absolute;
+                            right: 13px;
+                            cursor: pointer;
+                            color: #9ca3af;
+                            font-size: 15px;
+                        ">
+                            <i class="fas fa-eye"></i>
+                        </span>
                     </div>
                     @error('password')
                         <span class="text-danger" style="font-size:0.78rem;">
@@ -159,6 +168,23 @@
 {{-- Scripts --}}
 <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+    // Mostrar/ocultar contraseña
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+            btn.style.color = '#0d2c6e';
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+            btn.style.color = '#9ca3af';
+        }
+    }
+</script>
 
 </body>
 </html>

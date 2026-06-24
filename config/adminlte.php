@@ -626,6 +626,16 @@ return [
     */
 
     'plugins' => [
+        'PasswordToggle' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type'     => 'js',
+                    'asset'    => true,
+                    'location' => 'js/password-toggle.js', // => public/js/password-toggle.js
+                ],
+            ],
+        ],
         'Datatables' => [
             'active' => false,
             'files' => [

@@ -15,6 +15,7 @@
             margin: 60px auto;
         }
         .fuerza-bar { height: 6px; border-radius: 3px; transition: width .3s, background .3s; }
+        .toggle-password { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -66,11 +67,20 @@
                         <i class="fas fa-lock mr-1"></i>
                         Nueva contraseña <span class="text-danger">*</span>
                     </label>
-                    <input type="password" name="password"
-                           class="form-control" id="input-password"
-                           autocomplete="new-password"
-                           placeholder="Mínimo 8 caracteres"
-                           required>
+                    <div class="input-group">
+                        <input type="password" name="password"
+                               class="form-control" id="input-password"
+                               autocomplete="new-password"
+                               placeholder="Mínimo 8 caracteres"
+                               required>
+                        <div class="input-group-append">
+                            <span class="input-group-text toggle-password"
+                                  onclick="togglePassword('input-password', this)"
+                                  aria-label="Mostrar contraseña">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
                     <div class="mt-2">
                         <div class="progress" style="height:6px">
                             <div id="fuerza-bar" class="progress-bar fuerza-bar"
@@ -85,11 +95,20 @@
                         <i class="fas fa-lock mr-1"></i>
                         Confirmar contraseña <span class="text-danger">*</span>
                     </label>
-                    <input type="password" name="password_confirmation"
-                           class="form-control" id="input-confirm"
-                           autocomplete="new-password"
-                           placeholder="Repite tu contraseña"
-                           required>
+                    <div class="input-group">
+                        <input type="password" name="password_confirmation"
+                               class="form-control" id="input-confirm"
+                               autocomplete="new-password"
+                               placeholder="Repite tu contraseña"
+                               required>
+                        <div class="input-group-append">
+                            <span class="input-group-text toggle-password"
+                                  onclick="togglePassword('input-confirm', this)"
+                                  aria-label="Mostrar contraseña">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
                     <small id="match-texto" class="mt-1 d-block"></small>
                 </div>
 
@@ -112,6 +131,19 @@
 </div>
 
 <script>
+// Mostrar/ocultar contraseña
+function togglePassword(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
 // Indicador de fortaleza
 document.getElementById('input-password').addEventListener('input', function() {
     const val   = this.value;
