@@ -272,7 +272,9 @@
                             </h3>
                         </div>
                         <form action="{{ route('helpdesk.tickets.seguimiento', $ticket) }}"
-                              method="POST">
+                              method="POST"
+                              enctype="multipart/form-data"
+                              id="form-seguimiento">
                             @csrf
                             <div class="card-body">
                                 <div class="row">
@@ -297,15 +299,33 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group mb-0">
+                                <div class="form-group">
                                     <label>Comentario</label>
                                     <input type="text" name="comentario"
                                            class="form-control"
                                            placeholder="Nota del seguimiento (opcional)">
                                 </div>
+
+                                {{-- —— Adjuntos —— --}}
+                                <div class="form-group mb-0">
+                                    <label>Adjuntar archivos o imágenes</label>
+                                    <div class="custom-file">
+                                        <input type="file" name="archivos[]" id="archivos"
+                                               class="custom-file-input" multiple
+                                               accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt">
+                                        <label class="custom-file-label" for="archivos" id="archivos-label">
+                                            Seleccionar archivos…
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Hasta 5 archivos, 5 MB cada uno. Imágenes, PDF, Word, Excel o texto.
+                                    </small>
+                                    @error('archivos')   <span class="text-danger small d-block">{{ $message }}</span> @enderror
+                                    @error('archivos.*') <span class="text-danger small d-block">{{ $message }}</span> @enderror
+                                </div>
                             </div>
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-info btn-sm">
+                                <button type="submit" class="btn btn-info btn-sm" id="btn-seguimiento">
                                     <i class="fas fa-save"></i> Guardar seguimiento
                                 </button>
                             </div>
@@ -346,6 +366,32 @@
                                             {{ $seg->comentario }}
                                         </div>
                                     @endif
+
+                                    {{-- —— Adjuntos del seguimiento —— --}}
+                                    @if($seg->archivos->isNotEmpty())
+                                        <div class="timeline-body">
+                                            <div class="d-flex flex-wrap" style="gap:.5rem;">
+                                                @foreach($seg->archivos as $archivo)
+                                                    @if($archivo->esImagen())
+                                                        <a href="{{ $archivo->url }}" target="_blank"
+                                                           title="{{ $archivo->nombre_original }}">
+                                                            <img src="{{ $archivo->url }}"
+                                                                 alt="{{ $archivo->nombre_original }}"
+                                                                 style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;">
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ $archivo->url }}" target="_blank"
+                                                           class="btn btn-sm btn-outline-secondary"
+                                                           title="{{ $archivo->nombre_original }}">
+                                                            <i class="fas fa-paperclip mr-1"></i>
+                                                            {{ \Illuminate\Support\Str::limit($archivo->nombre_original, 20) }}
+                                                            <span class="text-muted">({{ $archivo->tamano_legible }})</span>
+                                                        </a>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -384,6 +430,27 @@ if (estadoSelect) {
         if (resGroup) {
             resGroup.style.display = this.value === 'finalizado' ? 'block' : 'none';
         }
+    });
+}
+
+// Nombre(s) de archivo seleccionado(s) en el input de seguimiento
+const inputArchivos = document.getElementById('archivos');
+if (inputArchivos) {
+    inputArchivos.addEventListener('change', function () {
+        const label = document.getElementById('archivos-label');
+        if (this.files.length === 0)       label.textContent = 'Seleccionar archivos…';
+        else if (this.files.length === 1)  label.textContent = this.files[0].name;
+        else                               label.textContent = this.files.length + ' archivos seleccionados';
+    });
+}
+
+// Anti doble-submit del seguimiento (mismo patrón que el fix de duplicados)
+const formSeg = document.getElementById('form-seguimiento');
+if (formSeg) {
+    formSeg.addEventListener('submit', function () {
+        const btn = document.getElementById('btn-seguimiento');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1"></span> Guardando…';
     });
 }
 </script>

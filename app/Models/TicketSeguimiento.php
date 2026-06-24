@@ -9,4 +9,5 @@ class TicketSeguimiento extends Model
 
     public function ticket() { return $this->belongsTo(Ticket::class); }
     public function usuario() { return $this->belongsTo(User::class, 'user_id'); }
+    public function archivos() { return $this->hasMany(\App\Models\TicketSeguimientoArchivo::class, 'ticket_seguimiento_id'); }
 }

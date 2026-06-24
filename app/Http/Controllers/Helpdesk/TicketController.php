@@ -136,6 +136,7 @@ class TicketController extends Controller
             'categoriaServicio',
             'tecnicos',
             'seguimientos.usuario',
+            'seguimientos.archivos',
         ]);
 
         $tecnicos = User::role(['administrador', 'coordinador', 'auxiliar'])
