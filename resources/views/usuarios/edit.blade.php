@@ -28,3 +28,7 @@
         </form>
     </div>
 @stop
+
+@section('js')
+    @include('usuarios._scripts_departamento')
+@stop

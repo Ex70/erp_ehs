@@ -10,4 +10,11 @@ class Puesto extends Model{
     public function users(){
         return $this->hasMany(User::class);
     }
+
+    public function departamentos()
+{
+    return $this->belongsToMany(Departamento::class, 'departamento_puesto')
+                ->withPivot('activo')
+                ->withTimestamps();
+}
 }

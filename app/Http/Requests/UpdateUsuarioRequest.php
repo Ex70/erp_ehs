@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUsuarioRequest extends FormRequest
 {
@@ -29,10 +30,18 @@ class UpdateUsuarioRequest extends FormRequest
             'username'  => "required|string|max:50|unique:users,username,{$userId}",
             'email'     => "required|email|unique:users,email,{$userId}",
             'password'  => 'nullable|string|min:8|confirmed',
-            'puesto_id' => 'required|exists:puestos,id',
+            // 'puesto_id' => 'required|exists:puestos,id',
             'role'      => 'required|exists:roles,name',
             'avatar'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'activo'    => 'boolean',
+            'departamento_id' => ['nullable', 'exists:departamentos,id'],
+            'puesto_id'       => [
+                'nullable',
+                'required_with:departamento_id',
+                'exists:puestos,id',
+                Rule::exists('departamento_puesto', 'puesto_id')
+                    ->where(fn ($q) => $q->where('departamento_id', $this->input('departamento_id'))),
+            ],
         ];
     }
 
@@ -46,8 +55,10 @@ class UpdateUsuarioRequest extends FormRequest
             'email.unique'       => 'Ese correo ya está registrado.',
             'password.min'       => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
-            'puesto_id.required' => 'El puesto es obligatorio.',
+            // 'puesto_id.required' => 'El puesto es obligatorio.',
             'role.required'      => 'El rol es obligatorio.',
+            'puesto_id.exists'        => 'El puesto seleccionado no pertenece al departamento elegido.',
+            'puesto_id.required_with' => 'Debe seleccionar el puesto correspondiente al departamento.',
         ];
     }
 }

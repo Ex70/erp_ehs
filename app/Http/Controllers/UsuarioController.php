@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Puesto;
+use App\Models\Departamento;
 use App\Http\Requests\StoreUsuarioRequest;
 use App\Http\Requests\UpdateUsuarioRequest;
 use App\Notifications\BienvenidoUsuario;
@@ -15,17 +16,21 @@ use Illuminate\Support\Str;
 class UsuarioController extends Controller
 {
     public function index(){
-        $usuarios = User::with(['puesto', 'roles'])
+        $usuarios = User::with(['puesto', 'departamento', 'roles'])
                     ->orderBy('name')
                     ->paginate(10);
         return view('usuarios.index', compact('usuarios'));
     }
 
     public function create(){
-        $puestos = Puesto::where('activo', true)->orderBy('nombre')->get();
+        $departamentos = Departamento::activos()->orderBy('nombre')->get();
+
+        // El select de puestos se llena por AJAX según el departamento elegido
+        $puestos = collect();
+
         $roles = Role::orderBy('name')->get();
         $usuario = new \App\Models\User(); // instancia vacía, sin guardar
-        return view('usuarios.create', compact('puestos', 'roles','usuario'));
+        return view('usuarios.create', compact('departamentos', 'puestos', 'roles', 'usuario'));
     }
 
     public function store(StoreUsuarioRequest $request){
@@ -65,14 +70,21 @@ class UsuarioController extends Controller
     }
 
     public function show(User $usuario){
-        $usuario->load(['puesto', 'roles', 'permissions']);
+        $usuario->load(['puesto', 'departamento', 'roles', 'permissions']);
         return view('usuarios.show', compact('usuario'));
     }
 
     public function edit(User $usuario){
-        $puestos = Puesto::where('activo', true)->orderBy('nombre')->get();
-        $roles   = Role::orderBy('name')->get();
-        return view('usuarios.edit', compact('usuario', 'puestos', 'roles'));
+        $departamentos = Departamento::activos()->orderBy('nombre')->get();
+
+        // Precargar solo los puestos del departamento actual del usuario,
+        // para que el select llegue ya poblado y con la opción seleccionada
+        $puestos = $usuario->departamento
+            ? $usuario->departamento->puestosActivos()->get()
+            : collect();
+
+        $roles = Role::orderBy('name')->get();
+        return view('usuarios.edit', compact('usuario', 'departamentos', 'puestos', 'roles'));
     }
 
     public function update(UpdateUsuarioRequest $request, User $usuario){

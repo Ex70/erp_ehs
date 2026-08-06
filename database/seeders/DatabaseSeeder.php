@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
             AdquisicionesPermisosSeeder::class,
             HelpdeskCatalogosSeeder::class,
             HelpdeskPermisosSeeder::class,
+            DepartamentoSeeder::class,
+            DepartamentoPermisosSeeder::class,
         ]);
     }
 }

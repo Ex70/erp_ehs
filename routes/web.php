@@ -36,6 +36,7 @@ use App\Http\Controllers\Solvencias\SolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DepartamentoController;
 
 // ─── Público ────────────────────────────────────────────────────────────────
 Route::get('/', function () {
@@ -53,6 +54,11 @@ Route::post('/registro/completar/{token}', [RegistroController::class, 'guardar'
 
 // ─── Solo autenticados (todos los roles) ────────────────────────────────────
 Route::middleware('auth')->group(function () {
+
+Route::get('departamentos/{departamento}/puestos', [DepartamentoController::class, 'puestos'])
+    ->name('departamentos.puestos');
+
+    Route::resource('departamentos', DepartamentoController::class);
 
 // ── Two-Factor Authentication ──────────────────────────────
 Route::get('/two-factor/challenge',  [TwoFactorController::class, 'challenge'])->name('two-factor.challenge');

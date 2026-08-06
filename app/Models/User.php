@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'puesto_id',
+        'departamento_id',
         'avatar',
         'activo',
         'registro_token',
@@ -81,5 +82,9 @@ class User extends Authenticatable
 
     public function getRegistroCompletadoAttribute(): bool{
         return !is_null($this->registro_completado_at);
+    }
+
+    public function departamento(){
+        return $this->belongsTo(Departamento::class, 'departamento_id');
     }
 }
