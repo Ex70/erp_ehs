@@ -359,6 +359,13 @@ return [
                     'icon' => 'fas fa-key',
                     'can'  => 'permisos.ver',
                 ],
+                [
+                    'text'   => 'Departamentos',
+                    'url'    => 'departamentos',
+                    'icon'   => 'fas fa-sitemap',
+                    'active' => ['departamentos*'],
+                    'can'    => 'departamentos.ver',
+                ],
             ],
         ],
         [

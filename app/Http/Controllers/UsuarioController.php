@@ -24,10 +24,7 @@ class UsuarioController extends Controller
 
     public function create(){
         $departamentos = Departamento::activos()->orderBy('nombre')->get();
-
-        // El select de puestos se llena por AJAX según el departamento elegido
-        $puestos = collect();
-
+        $puestos = collect(); // se llenan por AJAX según el departamento
         $roles = Role::orderBy('name')->get();
         $usuario = new \App\Models\User(); // instancia vacía, sin guardar
         return view('usuarios.create', compact('departamentos', 'puestos', 'roles', 'usuario'));
@@ -35,6 +32,11 @@ class UsuarioController extends Controller
 
     public function store(StoreUsuarioRequest $request){
         $data = $request->validated();
+
+        // El rol NO es una columna de users: lo maneja Spatie por tabla pivote.
+        // Debe salir del arreglo antes de crear el modelo.
+        $rolSeleccionado = $data['role'];
+        unset($data['role']);
 
         // Guardar contraseña temporal antes de hashear
         $passwordTemporal = $data['password'];
@@ -50,7 +52,7 @@ class UsuarioController extends Controller
         }
 
         $usuario = User::create($data);
-        $usuario->assignRole($request->role);
+        $usuario->syncRoles([$rolSeleccionado]);
 
         // Generar URL de completar registro
         $urlRegistro = route('registro.completar', [
@@ -77,8 +79,8 @@ class UsuarioController extends Controller
     public function edit(User $usuario){
         $departamentos = Departamento::activos()->orderBy('nombre')->get();
 
-        // Precargar solo los puestos del departamento actual del usuario,
-        // para que el select llegue ya poblado y con la opción seleccionada
+        // Precargar los puestos del departamento actual para que el select
+        // llegue poblado y con la opción correcta seleccionada
         $puestos = $usuario->departamento
             ? $usuario->departamento->puestosActivos()->get()
             : collect();
@@ -89,12 +91,19 @@ class UsuarioController extends Controller
 
     public function update(UpdateUsuarioRequest $request, User $usuario){
         $data = $request->validated();
+
+        // El rol NO es columna de users: se sincroniza aparte con Spatie
+        $rolSeleccionado = $data['role'];
+        unset($data['role']);
+
         if (empty($data['password'])) {
             unset($data['password']);
         } else {
             $data['password'] = Hash::make($data['password']);
         }
+
         $data['activo'] = $request->boolean('activo', false);
+
         if ($request->hasFile('avatar')) {
             // Eliminar avatar anterior si existe
             if ($usuario->avatar) {
@@ -102,8 +111,9 @@ class UsuarioController extends Controller
             }
             $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
+
         $usuario->update($data);
-        $usuario->syncRoles($request->role);
+        $usuario->syncRoles([$rolSeleccionado]);
 
         return redirect()
             ->route('usuarios.index')

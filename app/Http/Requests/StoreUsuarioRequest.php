@@ -28,10 +28,10 @@ class StoreUsuarioRequest extends FormRequest
             'username'  => 'required|string|max:50|unique:users,username',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|string|min:8|confirmed',
-            // 'puesto_id' => 'required|exists:puestos,id',
             'role'      => 'required|exists:roles,name',
             'avatar'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'activo'    => 'boolean',
+
             'departamento_id' => ['nullable', 'exists:departamentos,id'],
             'puesto_id'       => [
                 'nullable',
@@ -54,12 +54,12 @@ class StoreUsuarioRequest extends FormRequest
             'password.required'  => 'La contraseña es obligatoria.',
             'password.min'       => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
-            'puesto_id.required' => 'El puesto es obligatorio.',
-            // 'puesto_id.exists'   => 'El puesto seleccionado no existe.',
             'role.required'      => 'El rol es obligatorio.',
             'role.exists'        => 'El rol seleccionado no es válido.',
             'avatar.image'       => 'El archivo debe ser una imagen.',
             'avatar.max'         => 'La imagen no debe superar 2MB.',
+
+            'departamento_id.exists'  => 'El departamento seleccionado no existe.',
             'puesto_id.exists'        => 'El puesto seleccionado no pertenece al departamento elegido.',
             'puesto_id.required_with' => 'Debe seleccionar el puesto correspondiente al departamento.',
         ];
