@@ -32,7 +32,6 @@ use App\Http\Controllers\Sistemas\DispositivoController;
 use App\Http\Controllers\Sistemas\MarcaController;
 use App\Http\Controllers\Solvencias\CuentaBancariaController;
 use App\Http\Controllers\Solvencias\EmpresaSolvenciaController;
-use App\Http\Controllers\Solvencias\ProveedorSolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
@@ -52,7 +51,7 @@ Route::get('/registro/completar/{token}',  [RegistroController::class, 'completa
 Route::post('/registro/completar/{token}', [RegistroController::class, 'guardar'])->name('registro.guardar');
 
 
-// ─── Solo autenticados (todos los roles, sin permiso adicional) ─────────────
+// ─── Solo autenticados (sin permiso adicional) ──────────────────────────────
 Route::middleware('auth')->group(function () {
 
     // Two-Factor Authentication
@@ -80,18 +79,32 @@ Route::middleware('auth')->group(function () {
 // ─── Departamentos ──────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Endpoint del select encadenado: debe ir ANTES del resource,
-    // si no, 'departamentos/{departamento}' lo captura primero
+    // El endpoint del select encadenado va ANTES del resource;
+    // si no, 'departamentos/{departamento}' lo captura primero.
+    // Sin permiso: lo consume el formulario de usuarios.
     Route::get('departamentos/{departamento}/puestos', [DepartamentoController::class, 'puestos'])
         ->name('departamentos.puestos');
 
-    Route::get('departamentos',                  [DepartamentoController::class, 'index'])->name('departamentos.index')->middleware('can:departamentos.ver');
-    Route::get('departamentos/create',           [DepartamentoController::class, 'create'])->name('departamentos.create')->middleware('can:departamentos.crear');
-    Route::post('departamentos',                 [DepartamentoController::class, 'store'])->name('departamentos.store')->middleware('can:departamentos.crear');
-    Route::get('departamentos/{departamento}',   [DepartamentoController::class, 'show'])->name('departamentos.show')->middleware('can:departamentos.ver');
-    Route::get('departamentos/{departamento}/edit', [DepartamentoController::class, 'edit'])->name('departamentos.edit')->middleware('can:departamentos.editar');
-    Route::put('departamentos/{departamento}',   [DepartamentoController::class, 'update'])->name('departamentos.update')->middleware('can:departamentos.editar');
-    Route::delete('departamentos/{departamento}',[DepartamentoController::class, 'destroy'])->name('departamentos.destroy')->middleware('can:departamentos.eliminar');
+    Route::get('departamentos', [DepartamentoController::class, 'index'])
+        ->name('departamentos.index')->middleware('can:departamentos.ver');
+
+    Route::get('departamentos/create', [DepartamentoController::class, 'create'])
+        ->name('departamentos.create')->middleware('can:departamentos.crear');
+
+    Route::post('departamentos', [DepartamentoController::class, 'store'])
+        ->name('departamentos.store')->middleware('can:departamentos.crear');
+
+    Route::get('departamentos/{departamento}', [DepartamentoController::class, 'show'])
+        ->name('departamentos.show')->middleware('can:departamentos.ver');
+
+    Route::get('departamentos/{departamento}/edit', [DepartamentoController::class, 'edit'])
+        ->name('departamentos.edit')->middleware('can:departamentos.editar');
+
+    Route::put('departamentos/{departamento}', [DepartamentoController::class, 'update'])
+        ->name('departamentos.update')->middleware('can:departamentos.editar');
+
+    Route::delete('departamentos/{departamento}', [DepartamentoController::class, 'destroy'])
+        ->name('departamentos.destroy')->middleware('can:departamentos.eliminar');
 
 });
 
@@ -103,7 +116,8 @@ Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function
         ->name('dashboard')
         ->middleware('can:tickets.dashboard');
 
-    // Tickets — cualquier usuario autenticado puede crear y ver los suyos
+    // Tickets — cualquier autenticado crea y ve los suyos;
+    // el alcance propio/todos se resuelve dentro del controlador
     Route::resource('tickets', TicketController::class);
 
     Route::post('tickets/{ticket}/asignar', [AsignacionController::class, 'store'])
@@ -114,23 +128,25 @@ Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function
         ->name('tickets.seguimiento')
         ->middleware('can:tickets.asignar');
 
-    // Calificación — solicitante (sin restricción de permiso adicional)
     Route::post('tickets/{ticket}/calificar', [CalificacionController::class, 'store'])
-        ->name('tickets.calificar');
+        ->name('tickets.calificar')
+        ->middleware('can:tickets.calificar');
 
-    // Catálogos del helpdesk — por permiso, no por rol
-    Route::middleware('can:cat_helpdesk.ver')->group(function () {
-        Route::get('catalogos', [CatalogoHelpdeskController::class, 'index'])
-            ->name('catalogos.index');
-        Route::post('catalogos/tipos-falla', [CatalogoHelpdeskController::class, 'storeTipo'])
-            ->name('catalogos.tipos.store');
-        Route::put('catalogos/tipos-falla/{tipoFalla}', [CatalogoHelpdeskController::class, 'updateTipo'])
-            ->name('catalogos.tipos.update');
-        Route::post('catalogos/categorias', [CatalogoHelpdeskController::class, 'storeCategoria'])
-            ->name('catalogos.categorias.store');
-        Route::put('catalogos/categorias/{categoriaServicio}', [CatalogoHelpdeskController::class, 'updateCategoria'])
-            ->name('catalogos.categorias.update');
-    });
+    // Catálogos del helpdesk
+    Route::get('catalogos', [CatalogoHelpdeskController::class, 'index'])
+        ->name('catalogos.index')->middleware('can:cat_helpdesk.ver');
+
+    Route::post('catalogos/tipos-falla', [CatalogoHelpdeskController::class, 'storeTipo'])
+        ->name('catalogos.tipos.store')->middleware('can:cat_helpdesk.crear');
+
+    Route::put('catalogos/tipos-falla/{tipoFalla}', [CatalogoHelpdeskController::class, 'updateTipo'])
+        ->name('catalogos.tipos.update')->middleware('can:cat_helpdesk.editar');
+
+    Route::post('catalogos/categorias', [CatalogoHelpdeskController::class, 'storeCategoria'])
+        ->name('catalogos.categorias.store')->middleware('can:cat_helpdesk.crear');
+
+    Route::put('catalogos/categorias/{categoriaServicio}', [CatalogoHelpdeskController::class, 'updateCategoria'])
+        ->name('catalogos.categorias.update')->middleware('can:cat_helpdesk.editar');
 
 });
 
@@ -142,7 +158,8 @@ Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
     Route::get('comunicados/defaults', [\App\Http\Controllers\RRHH\ComunicadoController::class, 'defaults'])
         ->name('comunicados.defaults');
 
-    // Comunicados y Noticias — la autorización fina va en el controlador
+    // Comunicados — todos consultan; la autorización de escritura
+    // ya está resuelta dentro del controlador
     Route::resource('comunicados', \App\Http\Controllers\RRHH\ComunicadoController::class)
         ->except(['create', 'edit']);
 
@@ -177,7 +194,7 @@ Route::middleware('auth')->prefix('adquisiciones')->name('adquisiciones.')->grou
 
     Route::post('requerimientos/{requerimiento}/adjudicar', [AdjudicacionController::class, 'store'])
         ->name('requerimientos.adjudicar')
-        ->middleware('can:adquisiciones.editar');
+        ->middleware('can:adquisiciones.adjudicar');
 
     Route::post('requerimientos/{requerimiento}/notas', [NotaController::class, 'store'])
         ->name('requerimientos.notas.store')
@@ -190,11 +207,12 @@ Route::middleware('auth')->prefix('adquisiciones')->name('adquisiciones.')->grou
     // Catálogos de adquisiciones
     Route::middleware('can:cat_adquisiciones.ver')->group(function () {
 
-        Route::resource('clientes',    ClienteController::class)->except(['create', 'edit', 'show']);
-        Route::resource('empresas',    EmpresaController::class)->except(['create', 'edit', 'show']);
+        Route::resource('clientes', ClienteController::class)->except(['create', 'edit', 'show']);
+        Route::resource('empresas', EmpresaController::class)->except(['create', 'edit', 'show']);
 
         // La ruta específica va antes del resource
-        Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])->name('proveedores.ranking');
+        Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])
+            ->name('proveedores.ranking');
         Route::resource('proveedores', ProveedorController::class)->except(['create', 'edit']);
 
         Route::resource('unidades-medida', UnidadMedidaController::class)
@@ -252,11 +270,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('proveedores/{proveedor}/cuentas', [CuentaBancariaProveedorController::class, 'store'])
         ->name('proveedores.cuentas.store')
-        ->middleware('can:cat_adquisiciones.ver');
+        ->middleware('can:cat_adquisiciones.crear');
 
     Route::delete('cuentas/{cuenta}', [CuentaBancariaProveedorController::class, 'destroy'])
         ->name('proveedores.cuentas.destroy')
-        ->middleware('can:cat_adquisiciones.ver');
+        ->middleware('can:cat_adquisiciones.eliminar');
 
 });
 
@@ -270,18 +288,18 @@ Route::middleware('auth')->prefix('sistemas')->name('sistemas.')->group(function
 
     Route::resource('dispositivos', DispositivoController::class)
         ->except(['create', 'edit', 'show'])
-        ->middleware('can:redes.ver');
+        ->middleware('can:catalogos_sistemas.ver');
 
     Route::resource('marcas', MarcaController::class)
         ->except(['create', 'edit', 'show'])
-        ->middleware('can:redes.ver');
+        ->middleware('can:catalogos_sistemas.ver');
 
 });
 
 
-// ─── Administración del sistema (roles y permisos) ──────────────────────────
-// Estas SÍ se mantienen por rol: quien administra roles puede escalar
-// privilegios, así que no debe depender de un permiso otorgable
+// ─── Administración del sistema ─────────────────────────────────────────────
+// Se mantiene por ROL a propósito: quien administra roles puede otorgarse
+// cualquier permiso, así que este acceso no debe ser delegable por permiso.
 Route::middleware(['auth', 'role:administrador'])->group(function () {
 
     Route::resource('roles', RolController::class)
