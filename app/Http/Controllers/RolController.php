@@ -30,7 +30,9 @@ class RolController extends Controller
     public function store(StoreRolRequest $request)
     {
         $rol = Role::create(['name' => $request->name]);
-        $rol->syncPermissions($request->permissions ?? []);
+
+        // El formulario envía el input como 'permisos[]', no 'permissions[]'
+        $rol->syncPermissions($request->input('permisos', []));
 
         return redirect()
             ->route('roles.index')
@@ -61,7 +63,9 @@ class RolController extends Controller
     public function update(UpdateRolRequest $request, Role $rol)
     {
         $rol->update(['name' => $request->name]);
-        $rol->syncPermissions($request->permissions ?? []);
+
+        // El formulario envía el input como 'permisos[]', no 'permissions[]'
+        $rol->syncPermissions($request->input('permisos', []));
 
         return redirect()
             ->route('roles.index')
