@@ -7,6 +7,7 @@ use App\Models\TipoFalla;
 use App\Models\CategoriaServicio;
 use App\Models\User;
 use App\Notifications\NuevoTicketNotificacion;
+use App\Services\Helpdesk\TecnicoService;
 use App\Traits\NotificaTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,12 +17,13 @@ use Spatie\Permission\Models\Role;
 class TicketController extends Controller
 {
     use NotificaTicket;
+
     public function index(Request $request)
     {
         // Administrador/coordinador ve todos — el resto solo los suyos
         $query = Auth::user()->can('tickets.ver.todos')
-            ? Ticket::with(['solicitante.puesto', 'tipoFalla', 'categoriaServicio', 'tecnicos'])
-            : Ticket::with(['solicitante.puesto', 'tipoFalla', 'categoriaServicio', 'tecnicos'])
+            ? Ticket::with(['solicitante.puesto', 'solicitante.departamento', 'tipoFalla', 'categoriaServicio', 'tecnicos'])
+            : Ticket::with(['solicitante.puesto', 'solicitante.departamento', 'tipoFalla', 'categoriaServicio', 'tecnicos'])
                     ->where('user_id', Auth::id());
 
         if ($request->filled('q')) {
@@ -132,17 +134,16 @@ class TicketController extends Controller
 
         $ticket->load([
             'solicitante.puesto',
+            'solicitante.departamento',
             'tipoFalla',
             'categoriaServicio',
-            'tecnicos',
+            'tecnicos.puesto',
             'seguimientos.usuario',
             'seguimientos.archivos',
         ]);
 
-        $tecnicos = User::role(['administrador', 'coordinador', 'auxiliar'])
-                        ->where('activo', true)
-                        ->orderBy('name')
-                        ->get();
+        // Solo usuarios activos del departamento de soporte (config/helpdesk.php)
+        $tecnicos = TecnicoService::disponibles();
 
         $estatuses = Ticket::etiquetasSeguimiento();
 

@@ -36,6 +36,24 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show">
+            <ul class="mb-0 pl-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
+
     @php
         $clsPrioridad   = Ticket::coloresPrioridad()[$ticket->prioridad] ?? 'secondary';
         $clsSeguimiento = Ticket::coloresSeguimiento()[$ticket->seguimiento] ?? 'secondary';
@@ -59,6 +77,8 @@
                         <tr><th>Solicitante</th>
                             <td>{{ $ticket->solicitante?->name }}</td></tr>
                         <tr><th>Departamento</th>
+                            <td>{{ $ticket->solicitante?->departamento?->nombre ?? '—' }}</td></tr>
+                        <tr><th>Puesto</th>
                             <td>{{ $ticket->solicitante?->puesto?->nombre ?? '—' }}</td></tr>
                         <tr><th>Tipo de falla</th>
                             <td>
@@ -110,7 +130,12 @@
                                     <i class="fas fa-user text-white" style="font-size:12px"></i>
                                 </div>
                             @endif
-                            <span>{{ $tec->name }}</span>
+                            <div class="d-flex flex-column">
+                                <span>{{ $tec->name }}</span>
+                                @if($tec->puesto)
+                                    <small class="text-muted">{{ $tec->puesto->nombre }}</small>
+                                @endif
+                            </div>
                         </div>
                     @empty
                         <p class="text-muted mb-0">Sin asignar</p>
@@ -127,30 +152,49 @@
                                 <i class="fas fa-user-plus mr-1"></i> Asignar técnico(s)
                             </h3>
                         </div>
-                        <form action="{{ route('helpdesk.tickets.asignar', $ticket) }}"
-                              method="POST">
-                            @csrf
+
+                        @if($tecnicos->isEmpty())
                             <div class="card-body">
-                                <div class="form-group mb-0">
-                                    <select name="tecnicos[]" class="form-control" multiple>
-                                        @foreach($tecnicos as $tec)
-                                            <option value="{{ $tec->id }}"
-                                                {{ $ticket->tecnicos->contains($tec->id) ? 'selected' : '' }}>
-                                                {{ $tec->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="text-muted">
-                                        Mantén <kbd>Ctrl</kbd> para seleccionar varios
-                                    </small>
+                                <div class="alert alert-warning mb-0">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    No hay usuarios activos registrados en el departamento de soporte.
+                                    Asígnalos desde <strong>Usuarios</strong> o revisa el catálogo de
+                                    <strong>Departamentos</strong>.
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-warning btn-sm btn-block">
-                                    <i class="fas fa-save"></i> Guardar asignación
-                                </button>
-                            </div>
-                        </form>
+                        @else
+                            <form action="{{ route('helpdesk.tickets.asignar', $ticket) }}"
+                                  method="POST">
+                                @csrf
+                                <div class="card-body">
+                                    <div class="form-group mb-0">
+                                        <select name="tecnicos[]"
+                                                class="form-control @error('tecnicos') is-invalid @enderror"
+                                                multiple
+                                                size="{{ min($tecnicos->count(), 6) }}"
+                                                required>
+                                            @foreach($tecnicos as $tec)
+                                                <option value="{{ $tec->id }}"
+                                                    {{ $ticket->tecnicos->contains($tec->id) ? 'selected' : '' }}>
+                                                    {{ $tec->name }}@if($tec->puesto) — {{ $tec->puesto->nombre }}@endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('tecnicos')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">
+                                            Mantén <kbd>Ctrl</kbd> para seleccionar varios
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-warning btn-sm btn-block">
+                                        <i class="fas fa-save"></i> Guardar asignación
+                                    </button>
+                                </div>
+                            </form>
+                        @endif
                     </div>
                 @endif
             @endcan
