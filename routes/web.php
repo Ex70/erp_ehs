@@ -27,6 +27,7 @@ use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PuestoController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\RRHH\ComunicadoController;
 use App\Http\Controllers\Sistemas\AsignacionIpController;
 use App\Http\Controllers\Sistemas\DispositivoController;
 use App\Http\Controllers\Sistemas\MarcaController;
@@ -155,8 +156,12 @@ Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function
 Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
 
     // La ruta específica va antes del resource
-    Route::get('comunicados/defaults', [\App\Http\Controllers\RRHH\ComunicadoController::class, 'defaults'])
+    Route::get('comunicados/defaults', [ComunicadoController::class, 'defaults'])
         ->name('comunicados.defaults');
+
+    Route::post('comunicados/preview-destinatarios', [ComunicadoController::class, 'previewDestinatarios'])
+        ->name('comunicados.preview-destinatarios')
+        ->middleware('can:comunicados.crear');
 
     // Comunicados — todos consultan; la autorización de escritura
     // ya está resuelta dentro del controlador
