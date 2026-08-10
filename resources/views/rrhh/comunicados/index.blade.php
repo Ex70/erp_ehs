@@ -400,23 +400,48 @@
     }
     .gap-2 { gap: .5rem; }
 
-    /* Select2 alineado a la estética del modal */
-    .select2-container--bootstrap4 .select2-selection--multiple {
+    /* Select2 (tema default) alineado a la estética del modal */
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #ced4da;
         border-radius: 6px;
         min-height: 38px;
+        padding: 2px 4px;
     }
-    .select2-container--bootstrap4 .select2-selection__choice {
-        background-color: #E43022 !important;
-        border-color: #C0392B !important;
-        color: #fff !important;
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #E43022;
+        box-shadow: 0 0 0 .2rem rgba(228,48,34,.15);
     }
-    .select2-container--bootstrap4 .select2-selection__choice__remove {
-        color: #fff !important;
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #E43022;
+        border: 1px solid #C0392B;
+        border-radius: 4px;
+        color: #fff;
+        font-size: .82rem;
+        padding: 1px 8px;
+        margin-top: 5px;
     }
-    #fExcluidos + .select2-container--bootstrap4 .select2-selection__choice {
-        background-color: #6c757d !important;
-        border-color: #5a6268 !important;
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #fff;
+        margin-right: 5px;
+        opacity: .85;
     }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #fff;
+        opacity: 1;
+    }
+    .select2-container--default .select2-results__group {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #999;
+    }
+    /* Chips grises para el select de exclusiones */
+    #fExcluidos + .select2-container--default .select2-selection__choice {
+        background-color: #6c757d;
+        border-color: #5a6268;
+    }
+    /* El dropdown debe quedar por encima del modal */
+    .select2-container { z-index: 1060; }
 </style>
 @endsection
 
@@ -480,7 +505,6 @@ document.getElementById('fArchivo')?.addEventListener('change', function () {
 $(function () {
     $('.select-destinatarios').each(function () {
         $(this).select2({
-            theme: 'bootstrap4',
             width: '100%',
             placeholder: $(this).data('placeholder'),
             closeOnSelect: false,
