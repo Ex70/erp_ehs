@@ -1,0 +1,178 @@
+/* ═══════════════════════════════════════════════════════════
+   CULTURA ORGANIZACIONAL — EHS ERP
+   Adaptación del prototipo grupo-quetzalcoatl-rrhh-v6.html
+   a AdminLTE 3.2 / Bootstrap 4 (tema claro)
+   ═══════════════════════════════════════════════════════════ */
+
+.cultura-wrap {
+  --c-bg:      #ffffff;
+  --c-bg-soft: #faf7f2;
+  --c-border:  #e6e1d8;
+  --c-border2: #cfc7b8;
+  --c-text:    #2c2c2c;
+  --c-text2:   #5f5a52;
+  --c-text3:   #918a7e;
+  --c-accent:  #e43022;
+  --c-serif:   'Cinzel', Georgia, 'Times New Roman', serif;
+  --c-shadow:  0 6px 18px rgba(0, 0, 0, .08);
+}
+
+.cultura-wrap .cultura-serif {
+  font-family: var(--c-serif);
+  font-variant: small-caps;
+  letter-spacing: .5px;
+}
+
+/* ── Carrusel ── */
+.cultura-hero {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+}
+.cultura-slides {
+  display: flex;
+  transition: transform .55s cubic-bezier(.4, 0, .2, 1);
+  will-change: transform;
+}
+.cultura-slide { min-width: 100%; position: relative; }
+.cultura-slide-img { width: 100%; height: 340px; object-fit: cover; display: block; }
+.cultura-slide-placeholder {
+  width: 100%; height: 340px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px;
+}
+.cultura-slide-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .82));
+  padding: 28px 24px 20px;
+  color: #fff;
+}
+.cultura-slide-caption h3 {
+  font-family: var(--c-serif);
+  font-variant: small-caps;
+  font-size: 20px; font-weight: 700; margin-bottom: 4px;
+}
+.cultura-slide-caption p { font-size: 12.5px; opacity: .82; margin: 0; }
+
+.cultura-nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(0, 0, 0, .55); border: none; color: #fff;
+  font-size: 18px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .18s; z-index: 10;
+}
+.cultura-nav-btn:hover { background: rgba(228, 48, 34, .85); color: #fff; }
+.cultura-prev { left: 12px; }
+.cultura-next { right: 12px; }
+
+.cultura-dots {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 10;
+}
+.cultura-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255, 255, 255, .45);
+  cursor: pointer; transition: all .22s; border: none; padding: 0;
+}
+.cultura-dot.active { background: #fff; transform: scale(1.25); }
+
+.cultura-slide-admin {
+  position: absolute; top: 10px; left: 12px;
+  display: flex; gap: 6px; z-index: 10;
+}
+.cultura-slide-admin .btn { font-size: 10px; padding: 3px 9px; }
+
+/* ── Pestañas ── */
+.cultura-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--c-border);
+  margin-bottom: 18px;
+}
+.cultura-tab {
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  padding: 9px 14px;
+  font-size: 12.5px; color: var(--c-text3);
+  cursor: pointer; transition: all .18s;
+  font-family: var(--c-serif); font-variant: small-caps; letter-spacing: .4px;
+}
+.cultura-tab:hover { color: var(--c-text); }
+.cultura-tab.active { color: var(--c-accent); border-bottom-color: var(--c-accent); }
+.cultura-pane { display: none; }
+.cultura-pane.active { display: block; animation: culturaFade .25s ease; }
+@keyframes culturaFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ── Tarjetas de sección ── */
+.cultura-sections { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+.cultura-sec-card {
+  background: var(--c-bg); border: 1px solid var(--c-border);
+  border-radius: 11px; padding: 18px; transition: all .22s;
+}
+.cultura-sec-card:hover { border-color: var(--c-border2); box-shadow: var(--c-shadow); }
+.cultura-sec-icon { font-size: 28px; margin-bottom: 9px; }
+.cultura-sec-title {
+  font-family: var(--c-serif); font-variant: small-caps;
+  font-size: 13px; font-weight: 600; color: var(--c-accent);
+  text-transform: none; letter-spacing: 1px; margin-bottom: 7px;
+}
+.cultura-sec-text { font-size: 13px; color: var(--c-text2); line-height: 1.8; }
+.cultura-prosa { font-size: 13.5px; color: var(--c-text2); line-height: 1.9; max-width: 820px; }
+
+/* ── Empresas ── */
+.cultura-empresas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 16px; }
+.cultura-emp-card {
+  background: var(--c-bg); border: 1px solid var(--c-border);
+  border-radius: 11px; overflow: hidden; transition: all .22s;
+}
+.cultura-emp-card:hover { border-color: var(--c-border2); transform: translateY(-2px); box-shadow: var(--c-shadow); }
+.cultura-emp-cover { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+.cultura-emp-body { padding: 14px; }
+.cultura-emp-name {
+  font-family: var(--c-serif); font-variant: small-caps;
+  font-size: 13px; font-weight: 700; color: var(--c-text); margin-bottom: 5px;
+}
+.cultura-emp-desc { font-size: 12px; color: var(--c-text2); line-height: 1.6; }
+
+/* ── Objetivos ── */
+.cultura-objetivos { list-style: none; padding: 0; margin: 0; max-width: 860px; }
+.cultura-objetivos li {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 11px 14px; margin-bottom: 8px;
+  background: var(--c-bg); border: 1px solid var(--c-border); border-radius: 9px;
+  font-size: 13px; color: var(--c-text2);
+}
+.cultura-objetivos li .num {
+  flex: 0 0 24px; height: 24px; border-radius: 50%;
+  background: var(--c-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+
+/* ── Filas del editor (modal) ── */
+.cultura-fila { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+.cultura-fila .form-control { font-size: 13px; }
+.cultura-fila .col-icono { flex: 0 0 62px; text-align: center; }
+.cultura-fila .col-color { flex: 0 0 92px; }
+.cultura-fila .col-titulo { flex: 1 1 30%; }
+.cultura-fila .col-desc { flex: 1 1 45%; }
+.cultura-fila .col-quitar { flex: 0 0 38px; }
+#modalCulturaSecciones .modal-dialog { max-width: 960px; }
+#modalCulturaSecciones .nav-tabs .nav-link { font-size: 12.5px; }
+
+/* ── Responsivo ── */
+@media (max-width: 991px) {
+  .cultura-sections { grid-template-columns: repeat(2, 1fr); }
+  .cultura-empresas { grid-template-columns: 1fr; }
+}
+@media (max-width: 575px) {
+  .cultura-sections { grid-template-columns: 1fr; }
+  .cultura-slide-img, .cultura-slide-placeholder { height: 220px; }
+  .cultura-slide-placeholder { font-size: 52px; }
+  .cultura-fila { flex-wrap: wrap; }
+  .cultura-fila .col-titulo, .cultura-fila .col-desc { flex: 1 1 100%; }
+}
