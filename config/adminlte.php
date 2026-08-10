@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'AdminLTE 3',
+    'title' => 'EHS ERP',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<b>Admin</b>LTE',
+    'logo' => '<b>ERP</b>EHS',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -503,6 +503,10 @@ return [
             'active'  => ['helpdesk/catalogos*'],
         ],
         [
+            'header' => 'RRHH',
+            'can'    => 'redes.ver',
+        ],
+        [
             'text'    => 'RRHH',
             'icon'    => 'fas fa-users',
             'submenu' => [
@@ -513,6 +517,12 @@ return [
                     'can'  => 'comunicados.ver',
                 ],
             ],
+        ],
+        [
+            'text' => 'Cultura Organizacional',
+            'url'  => 'rrhh/cultura',
+            'icon' => 'fas fa-fw fa-landmark',
+            'can'  => 'cultura.ver.todos',
         ],
         // Sidebar items:
         [

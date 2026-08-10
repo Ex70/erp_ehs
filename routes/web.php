@@ -36,6 +36,7 @@ use App\Http\Controllers\Solvencias\EmpresaSolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\RRHH\CulturaController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Público ────────────────────────────────────────────────────────────────
@@ -167,6 +168,36 @@ Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
     // ya está resuelta dentro del controlador
     Route::resource('comunicados', \App\Http\Controllers\RRHH\ComunicadoController::class)
         ->except(['create', 'edit']);
+
+    Route::middleware(['auth'])
+        ->prefix('rrhh/cultura')
+        ->name('rrhh.cultura.')
+        ->group(function () {
+
+        // Lectura
+        Route::get('/', [CulturaController::class, 'index'])
+            ->middleware('can:cultura.ver.todos')
+            ->name('index');
+
+        // Edición
+        Route::middleware('can:cultura.editar.todos')->group(function () {
+
+            // Secciones de texto: presentacion | mision | vision | historia | objetivos
+            Route::put('secciones/{clave}', [CulturaController::class, 'actualizarSeccion'])
+                ->name('secciones.update');
+
+            // Listas: valor | objetivo | empresa  (reemplazo completo de la colección)
+            Route::put('items/{tipo}', [CulturaController::class, 'sincronizarItems'])
+                ->name('items.sync');
+
+            // Carrusel. Se usa POST también para actualizar porque el formulario
+            // envía multipart/form-data (no se puede usar PUT con FormData en PHP).
+            Route::post('slides', [CulturaController::class, 'guardarSlide'])->name('slides.store');
+            Route::post('slides/{item}', [CulturaController::class, 'guardarSlide'])->name('slides.update');
+            Route::delete('slides/{item}', [CulturaController::class, 'eliminarSlide'])->name('slides.destroy');
+        });
+    });
+
 
 });
 

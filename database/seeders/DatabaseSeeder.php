@@ -32,6 +32,8 @@ class DatabaseSeeder extends Seeder
             HelpdeskPermisosSeeder::class,
             DepartamentoSeeder::class,
             DepartamentoPermisosSeeder::class,
+            CulturaPermisosSeeder::class,
+            CulturaOrganizacionalSeeder::class,
         ]);
     }
 }
