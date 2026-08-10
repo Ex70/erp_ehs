@@ -280,7 +280,8 @@
                                 <i class="fas fa-users mr-1"></i> Destinatarios de la notificación
                             </label>
 
-                            <div class="p-3" style="background:#FAF7F4; border:1px solid #E8E0D8; border-radius:10px;">
+                            <div id="bloqueDestinatarios" class="p-3"
+                                 style="background:#FAF7F4; border:1px solid #E8E0D8; border-radius:10px;">
 
                                 <div class="custom-control custom-radio mb-1">
                                     <input type="radio" class="custom-control-input alcance-radio"
@@ -400,7 +401,7 @@
     }
     .gap-2 { gap: .5rem; }
 
-    /* Select2 (tema default) alineado a la estética del modal */
+    /* ── Select2 (tema default) alineado a la estética del modal ── */
     .select2-container--default .select2-selection--multiple {
         border: 1px solid #ced4da;
         border-radius: 6px;
@@ -435,13 +436,25 @@
         letter-spacing: .06em;
         color: #999;
     }
+
     /* Chips grises para el select de exclusiones */
     #fExcluidos + .select2-container--default .select2-selection__choice {
         background-color: #6c757d;
         border-color: #5a6268;
     }
-    /* El dropdown debe quedar por encima del modal */
-    .select2-container { z-index: 1060; }
+
+    /* ── Posicionamiento del dropdown dentro del modal ──
+       El dropdown se ancla al .form-group de cada select (dropdownParent),
+       por eso el contenedor necesita ser el contexto de posicionamiento.
+       Acotado a #bloqueDestinatarios para no afectar otros formularios. */
+    #bloqueDestinatarios .form-group { position: relative; }
+
+    #bloqueDestinatarios .select2-container--open { z-index: 1060; }
+
+    #bloqueDestinatarios .select2-dropdown {
+        border-color: #ced4da;
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
 </style>
 @endsection
 
@@ -502,13 +515,15 @@ document.getElementById('fArchivo')?.addEventListener('change', function () {
 });
 
 // ── Select2 en los selectores de destinatarios ─────
+// dropdownParent apunta al .form-group propio de cada select, NO al modal:
+// anclarlo al modal descoloca el dropdown cuando el modal tiene scroll.
 $(function () {
     $('.select-destinatarios').each(function () {
         $(this).select2({
             width: '100%',
             placeholder: $(this).data('placeholder'),
             closeOnSelect: false,
-            dropdownParent: $('#modalPublicar')
+            dropdownParent: $(this).closest('.form-group')
         });
     });
 
