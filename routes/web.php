@@ -28,6 +28,7 @@ use App\Http\Controllers\PuestoController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\RRHH\ComunicadoController;
+use App\Http\Controllers\RRHH\CulturaController;
 use App\Http\Controllers\Sistemas\AsignacionIpController;
 use App\Http\Controllers\Sistemas\DispositivoController;
 use App\Http\Controllers\Sistemas\MarcaController;
@@ -36,7 +37,6 @@ use App\Http\Controllers\Solvencias\EmpresaSolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaController;
 use App\Http\Controllers\Solvencias\SolvenciaPdfController;
 use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\RRHH\CulturaController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Público ────────────────────────────────────────────────────────────────
@@ -156,6 +156,7 @@ Route::middleware('auth')->prefix('helpdesk')->name('helpdesk.')->group(function
 // ─── RRHH ───────────────────────────────────────────────────────────────────
 Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
 
+    // ── Comunicados ──
     // La ruta específica va antes del resource
     Route::get('comunicados/defaults', [ComunicadoController::class, 'defaults'])
         ->name('comunicados.defaults');
@@ -166,13 +167,14 @@ Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
 
     // Comunicados — todos consultan; la autorización de escritura
     // ya está resuelta dentro del controlador
-    Route::resource('comunicados', \App\Http\Controllers\RRHH\ComunicadoController::class)
+    Route::resource('comunicados', ComunicadoController::class)
         ->except(['create', 'edit']);
 
-    Route::middleware(['auth'])
-        ->prefix('rrhh/cultura')
-        ->name('rrhh.cultura.')
-        ->group(function () {
+    // ── Cultura Organizacional ──
+    // OJO: este grupo ya está dentro de prefix('rrhh')->name('rrhh.'),
+    // por eso aquí solo se agrega 'cultura'. Resultado: /rrhh/cultura
+    // con nombres rrhh.cultura.*
+    Route::prefix('cultura')->name('cultura.')->group(function () {
 
         // Lectura
         Route::get('/', [CulturaController::class, 'index'])
@@ -197,7 +199,6 @@ Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
             Route::delete('slides/{item}', [CulturaController::class, 'eliminarSlide'])->name('slides.destroy');
         });
     });
-
 
 });
 
