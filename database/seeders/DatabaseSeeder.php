@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
             DepartamentoPermisosSeeder::class,
             CulturaPermisosSeeder::class,
             CulturaOrganizacionalSeeder::class,
+            NormatividadPermisosSeeder::class,
+            NormatividadSeeder::class,
         ]);
     }
 }
