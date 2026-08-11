@@ -348,13 +348,13 @@ return [
                     'can'  => 'puestos.ver',
                 ],
                 [
-                    'text' => 'Roles',          // <-- nuevo
+                    'text' => 'Roles',
                     'url'  => 'roles',
                     'icon' => 'fas fa-user-tag',
                     'can'  => 'roles.ver',
                 ],
                 [
-                    'text' => 'Permisos',       // <-- nuevo
+                    'text' => 'Permisos',
                     'url'  => 'permisos',
                     'icon' => 'fas fa-key',
                     'can'  => 'permisos.ver',
@@ -507,22 +507,22 @@ return [
             'can'    => 'redes.ver',
         ],
         [
-            'text'    => 'RRHH',
-            'icon'    => 'fas fa-users',
-            'submenu' => [
-                [
-                    'text' => 'Comunicados y Noticias',
-                    'url'  => 'rrhh/comunicados',
-                    'icon' => 'fas fa-bullhorn',
-                    'can'  => 'comunicados.ver',
-                ],
-            ],
+            'text' => 'Comunicados y Noticias',
+            'url'  => 'rrhh/comunicados',
+            'icon' => 'fas fa-bullhorn',
+            'can'  => 'comunicados.ver',
         ],
         [
             'text' => 'Cultura Organizacional',
             'url'  => 'rrhh/cultura',
             'icon' => 'fas fa-fw fa-landmark',
             'can'  => 'cultura.ver.todos',
+        ],
+        [
+            'text' => 'Normatividad',
+            'url'  => 'rrhh/normatividad',
+            'icon' => 'fas fa-fw fa-scroll',
+            'can'  => 'normatividad.ver',
         ],
         // Sidebar items:
         [

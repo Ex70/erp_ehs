@@ -29,6 +29,7 @@ use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\RRHH\ComunicadoController;
 use App\Http\Controllers\RRHH\CulturaController;
+use App\Http\Controllers\RRHH\NormatividadController;
 use App\Http\Controllers\Sistemas\AsignacionIpController;
 use App\Http\Controllers\Sistemas\DispositivoController;
 use App\Http\Controllers\Sistemas\MarcaController;
@@ -198,6 +199,37 @@ Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
             Route::post('slides/{item}', [CulturaController::class, 'guardarSlide'])->name('slides.update');
             Route::delete('slides/{item}', [CulturaController::class, 'eliminarSlide'])->name('slides.destroy');
         });
+    });
+
+    Route::prefix('normatividad')->name('normatividad.')->group(function () {
+
+        // Lectura
+        Route::get('/', [NormatividadController::class, 'index'])
+            ->middleware('can:normatividad.ver')
+            ->name('index');
+
+        // Descargas: se sirven por controlador para respetar el permiso.
+        // Las rutas específicas van ANTES de las que capturan {documento}.
+        Route::get('versiones/{version}/descargar', [NormatividadController::class, 'descargarVersion'])
+            ->middleware('can:normatividad.ver')
+            ->name('versiones.descargar');
+
+        Route::get('{documento}/descargar', [NormatividadController::class, 'descargar'])
+            ->middleware('can:normatividad.ver')
+            ->name('descargar');
+
+        // Escritura
+        Route::post('/', [NormatividadController::class, 'store'])
+            ->middleware('can:normatividad.crear')
+            ->name('store');
+
+        Route::put('{documento}', [NormatividadController::class, 'update'])
+            ->middleware('can:normatividad.editar')
+            ->name('update');
+
+        Route::delete('{documento}', [NormatividadController::class, 'destroy'])
+            ->middleware('can:normatividad.eliminar')
+            ->name('destroy');
     });
 
 });
