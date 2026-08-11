@@ -35,14 +35,25 @@
     }
 
     async function enviar(url, opciones) {
-        const respuesta = await fetch(url, Object.assign({
-            headers: {
-                'X-CSRF-TOKEN': TOKEN,
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-            },
+        opciones = opciones || {};
+
+        // Las cabeceras se combinan APARTE: Object.assign es superficial y un
+        // 'headers' en las opciones reemplazaría el objeto completo, borrando
+        // el token CSRF (provoca 419 Page Expired).
+        const cabeceras = Object.assign({
+            'X-CSRF-TOKEN': TOKEN,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        }, opciones.headers || {});
+
+        const respuesta = await fetch(url, Object.assign({}, opciones, {
+            headers: cabeceras,
             credentials: 'same-origin',
-        }, opciones));
+        }));
+
+        if (respuesta.status === 419) {
+            throw { message: 'La sesión expiró. Recarga la página e intenta de nuevo.' };
+        }
 
         const datos = await respuesta.json().catch(() => ({}));
         if (!respuesta.ok) throw datos;
