@@ -22,6 +22,7 @@ use App\Http\Controllers\Helpdesk\CatalogoHelpdeskController;
 use App\Http\Controllers\Helpdesk\DashboardHelpdeskController;
 use App\Http\Controllers\Helpdesk\SeguimientoController;
 use App\Http\Controllers\Helpdesk\TicketController;
+use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PuestoController;
@@ -233,6 +234,26 @@ Route::middleware('auth')->prefix('rrhh')->name('rrhh.')->group(function () {
     });
 
 });
+
+/*
+|--------------------------------------------------------------------------
+| Notificaciones (bandeja in-app)
+|--------------------------------------------------------------------------
+| No requieren permisos: cada usuario solo accede a las suyas.
+*/
+Route::middleware(['auth'])
+    ->prefix('notificaciones')
+    ->name('notificaciones.')
+    ->group(function () {
+        Route::get('/', [NotificacionController::class, 'index'])->name('index');
+        Route::get('/contador', [NotificacionController::class, 'contador'])->name('contador');
+        Route::post('/leer-todas', [NotificacionController::class, 'leerTodas'])->name('leerTodas');
+        Route::delete('/limpiar-leidas', [NotificacionController::class, 'limpiarLeidas'])->name('limpiarLeidas');
+        Route::get('/{id}/ver', [NotificacionController::class, 'ver'])->name('ver');
+        Route::post('/{id}/leer', [NotificacionController::class, 'leer'])->name('leer');
+        Route::post('/{id}/no-leer', [NotificacionController::class, 'noLeer'])->name('noLeer');
+        Route::delete('/{id}', [NotificacionController::class, 'destroy'])->name('destroy');
+    });
 
 
 // ─── Usuarios y puestos ─────────────────────────────────────────────────────
