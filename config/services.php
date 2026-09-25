@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Bot API
+    |--------------------------------------------------------------------------
+    | Credenciales del bot creado con @BotFather. Los chats destino se
+    | definen por módulo (p. ej. config/helpdesk.php → telegram.chat_id).
+    |
+    | TELEGRAM_ENABLED funciona como interruptor general: en false ningún
+    | módulo envía mensajes, aunque tenga chat configurado.
+    */
+
+    'telegram' => [
+        'enabled' => (bool) env('TELEGRAM_ENABLED', false),
+        'token'   => env('TELEGRAM_BOT_TOKEN'),
+        'api_url' => env('TELEGRAM_API_URL', 'https://api.telegram.org'),
+        'timeout' => (int) env('TELEGRAM_TIMEOUT', 10),
+    ],
+
 ];

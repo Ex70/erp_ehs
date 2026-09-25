@@ -7,10 +7,12 @@ use App\Models\TipoFalla;
 use App\Models\CategoriaServicio;
 use App\Models\User;
 use App\Notifications\NuevoTicketNotificacion;
+use App\Notifications\NuevoTicketTelegramNotificacion;
 use App\Services\Helpdesk\TecnicoService;
 use App\Traits\NotificaTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 
@@ -119,6 +121,9 @@ class TicketController extends Controller
                 logger()->error("Error notificando jefe {$jefe->id}: " . $e->getMessage());
             }
         }
+
+        // Aviso al grupo de Telegram de Sistemas (complementa al correo)
+        $this->notificarTelegramNuevoTicket($ticket);
 
         return redirect()
             ->route('helpdesk.tickets.show', $ticket)
@@ -274,5 +279,26 @@ class TicketController extends Controller
         return redirect()
             ->route('helpdesk.tickets.index')
             ->with('success', "Ticket {$ticket->folio} eliminado correctamente.");
+    }
+
+    /**
+     * Envía el aviso de ticket nuevo al grupo de Telegram configurado en
+     * config/helpdesk.php. Si Telegram está deshabilitado o no hay chat
+     * configurado, no hace nada. Un fallo aquí nunca interrumpe el registro.
+     */
+    private function notificarTelegramNuevoTicket(Ticket $ticket): void
+    {
+        $chatId = config('helpdesk.telegram.chat_id');
+
+        if (! config('services.telegram.enabled') || blank($chatId)) {
+            return;
+        }
+
+        try {
+            Notification::route('telegram', $chatId)
+                ->notify(new NuevoTicketTelegramNotificacion($ticket));
+        } catch (\Throwable $e) {
+            logger()->error("Error enviando ticket {$ticket->folio} a Telegram: " . $e->getMessage());
+        }
     }
 }
