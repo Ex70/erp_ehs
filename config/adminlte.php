@@ -475,6 +475,20 @@ return [
             ],
         ],
         [
+            'text'    => 'Logística y Entregas',
+            'icon'    => 'fas fa-shipping-fast',
+            'can'     => ['logistica.ver', 'cat_logistica.ver'],
+            'submenu' => [
+                [
+                    'text'   => 'Unidades vehiculares',
+                    'url'    => 'adquisiciones/logistica/vehiculos',
+                    'icon'   => 'fas fa-car',
+                    'active' => ['adquisiciones/logistica/vehiculos*'],
+                    'can'    => 'cat_logistica.ver',
+                ],
+            ],
+        ],
+        [
             'header' => 'MESA DE AYUDA',
         ],
         [

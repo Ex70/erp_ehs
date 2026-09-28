@@ -1,3 +1,15 @@
+j
+
+
+
+
+
+
+
+
+
+
+
 <?php
 
 namespace App\Http\Controllers\RRHH;
@@ -126,7 +138,7 @@ class CulturaController extends Controller
         return response()->json([
             'ok'      => true,
             'mensaje' => 'Contenido guardado correctamente.',
-            'total'   => $items->count(),
+            'total'   => $items->count(),4670
         ]);
     }
 

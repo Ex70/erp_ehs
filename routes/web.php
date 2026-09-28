@@ -318,7 +318,8 @@ Route::middleware('auth')->prefix('adquisiciones')->name('adquisiciones.')->grou
         Route::resource('categorias-producto', CategoriaProductoController::class)
             ->except(['create', 'edit', 'show']);
     });
-
+    // Logística y Entregas (submódulo)
+    require __DIR__ . '/logistica.php';
 });
 
 
