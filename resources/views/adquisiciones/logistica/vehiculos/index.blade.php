@@ -110,7 +110,7 @@
                                 </td>
                                 <td class="align-middle text-center text-nowrap">
                                     <button type="button" class="btn btn-warning btn-xs btn-editar" title="Editar"
-                                            data-vehiculo='@json($v->only(['id', 'nombre', 'marca', 'modelo', 'anio', 'placas', 'numero_serie', 'color', 'combustible', 'rendimiento_km_l', 'km_actual', 'color_etiqueta', 'observaciones', 'activo']))'>
+                                            data-vehiculo="{{ json_encode($v->only(['id', 'nombre', 'marca', 'modelo', 'anio', 'placas', 'numero_serie', 'color', 'combustible', 'rendimiento_km_l', 'km_actual', 'color_etiqueta', 'observaciones', 'activo'])) }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     @can('logistica.eliminar')
@@ -291,8 +291,8 @@
 $(function () {
     const $modal = $('#modal-vehiculo');
     const $form  = $('#form-vehiculo');
-    const urlStore  = @json(route('adquisiciones.logistica.vehiculos.store'));
-    const urlUpdate = @json(route('adquisiciones.logistica.vehiculos.update', '__ID__'));
+    const urlStore  = @js(route('adquisiciones.logistica.vehiculos.store'));
+    const urlUpdate = @js(route('adquisiciones.logistica.vehiculos.update', '__ID__'));
 
     const defaults = {
         nombre: '', marca: '', modelo: '', anio: '', placas: '', numero_serie: '',
@@ -351,7 +351,7 @@ $(function () {
     // capturados ya vienen de old()).
     @if ($errors->any())
         @if (old('vehiculo_id'))
-            modoEditar(@json(old('vehiculo_id')), @json(old('nombre')));
+            modoEditar(@js(old('vehiculo_id')), @js(old('nombre')));
         @else
             modoCrear();
         @endif
