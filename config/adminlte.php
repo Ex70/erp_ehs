@@ -480,6 +480,13 @@ return [
             'can'     => ['logistica.ver', 'cat_logistica.ver'],
             'submenu' => [
                 [
+                    'text'   => 'Notas de remisión',
+                    'url'    => 'adquisiciones/logistica/remisiones',
+                    'icon'   => 'fas fa-file-signature',
+                    'active' => ['adquisiciones/logistica/remisiones*'],
+                    'can'    => 'logistica.ver',
+                ],
+                [
                     'text'   => 'Unidades vehiculares',
                     'url'    => 'adquisiciones/logistica/vehiculos',
                     'icon'   => 'fas fa-car',
