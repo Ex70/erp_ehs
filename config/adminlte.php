@@ -487,6 +487,13 @@ return [
                     'can'    => 'logistica.ver',
                 ],
                 [
+                    'text'   => 'Solicitud de combustible',
+                    'url'    => 'adquisiciones/logistica/combustible',
+                    'icon'   => 'fas fa-gas-pump',
+                    'active' => ['adquisiciones/logistica/combustible*'],
+                    'can'    => 'logistica.ver',
+                ],
+                [
                     'text'   => 'Unidades vehiculares',
                     'url'    => 'adquisiciones/logistica/vehiculos',
                     'icon'   => 'fas fa-car',

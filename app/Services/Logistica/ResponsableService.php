@@ -47,20 +47,24 @@ class ResponsableService
     }
 
     /**
-     * Igual que disponibles(), pero garantiza que el usuario ya guardado en un
-     * registro siga en la lista aunque hoy esté inactivo o en otro departamento.
-     * Se usa en los formularios de edición para no perder el valor.
+     * Igual que disponibles(), pero garantiza que los usuarios ya guardados en
+     * un registro sigan en la lista aunque hoy estén inactivos o en otro
+     * departamento. Se usa en los formularios de edición.
      */
-    public static function disponiblesCon(?int $userId): Collection
+    public static function disponiblesCon(?int ...$userIds): Collection
     {
         $lista = static::disponibles();
 
-        if ($userId && ! $lista->contains('id', $userId)) {
-            $actual = User::with('puesto')->find($userId);
+        $faltantes = collect($userIds)
+            ->filter()
+            ->unique()
+            ->reject(fn ($id) => $lista->contains('id', $id));
 
-            if ($actual) {
-                $lista = $lista->push($actual)->sortBy('name')->values();
-            }
+        if ($faltantes->isNotEmpty()) {
+            $lista = $lista
+                ->merge(User::with('puesto')->whereIn('id', $faltantes)->get())
+                ->sortBy('name')
+                ->values();
         }
 
         return $lista;
@@ -69,9 +73,9 @@ class ResponsableService
     /**
      * IDs válidos para Rule::in() en la validación.
      */
-    public static function idsDisponibles(?int $incluir = null): array
+    public static function idsDisponibles(?int ...$incluir): array
     {
-        return static::disponiblesCon($incluir)->pluck('id')->all();
+        return static::disponiblesCon(...$incluir)->pluck('id')->all();
     }
 
     /**

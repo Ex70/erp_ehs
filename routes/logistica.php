@@ -11,6 +11,7 @@
 */
 
 use App\Http\Controllers\Adquisiciones\Logistica\RemisionController;
+use App\Http\Controllers\Adquisiciones\Logistica\SolicitudCombustibleController;
 use App\Http\Controllers\Adquisiciones\Logistica\VehiculoController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,20 @@ Route::prefix('logistica')->name('logistica.')->group(function () {
             Route::get('{remision}/edit', 'edit')->name('edit')->middleware('can:logistica.editar');
             Route::put('{remision}', 'update')->name('update')->middleware('can:logistica.editar');
             Route::delete('{remision}', 'destroy')->name('destroy')->middleware('can:logistica.eliminar');
+        });
+
+    // ── Solicitud de combustible ────────────────────────────────────────
+    Route::prefix('combustible')->name('combustible.')
+        ->controller(SolicitudCombustibleController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('can:logistica.ver');
+            Route::get('create', 'create')->name('create')->middleware('can:logistica.crear');
+            Route::post('/', 'store')->name('store')->middleware('can:logistica.crear');
+            Route::get('{solicitud}', 'show')->name('show')->middleware('can:logistica.ver');
+            Route::get('{solicitud}/pdf', 'pdf')->name('pdf')->middleware('can:logistica.ver');
+            Route::get('{solicitud}/edit', 'edit')->name('edit')->middleware('can:logistica.editar');
+            Route::put('{solicitud}', 'update')->name('update')->middleware('can:logistica.editar');
+            Route::delete('{solicitud}', 'destroy')->name('destroy')->middleware('can:logistica.eliminar');
         });
 
     // ── Catálogo de unidades vehiculares ────────────────────────────────
