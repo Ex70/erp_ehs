@@ -1,15 +1,3 @@
-j
-
-
-
-
-
-
-
-
-
-
-
 <?php
 
 namespace App\Http\Controllers\RRHH;
