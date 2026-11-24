@@ -323,7 +323,12 @@ Route::middleware('auth')->prefix('adquisiciones')->name('adquisiciones.')->grou
 });
 
 
-// ─── Solvencias ─────────────────────────────────────────────────────────────
+// ─── Solvencias económicas · Trazabilidad (cadena de custodia) ──────────────
+// Módulo nuevo, disponible para todos como la Mesa de Ayuda: /solvencias-economicas
+require __DIR__ . '/solvencias.php';
+
+
+// ─── Solvencias (formato anterior SIST, se conserva para consulta) ──────────
 Route::middleware('auth')->prefix('solvencias')->name('solvencias.')->group(function () {
 
     Route::resource('/', SolvenciaController::class)

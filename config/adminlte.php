@@ -380,9 +380,12 @@ return [
             'active'  => ['sistemas/redes*'],
         ],
         [
-            'text'    => 'Solvencias Económicas',
+            // Formato anterior (folios SIST-###). Se conserva para consulta;
+            // el flujo vigente está en SOLVENCIAS ECONÓMICAS.
+            'text'    => 'Solvencias SIST (anterior)',
             'icon'    => 'fas fa-file-invoice-dollar',
-            'active'  => ['solvencias*'],
+            'can'     => 'solvencias.ver',
+            'active'  => ['solvencias', 'solvencias/*'],
             'submenu' => [
                 [
                     'text'   => 'Solicitudes',
@@ -501,6 +504,42 @@ return [
                     'can'    => 'cat_logistica.ver',
                 ],
             ],
+        ],
+        [
+            'header' => 'SOLVENCIAS ECONÓMICAS',
+        ],
+        [
+            'text'   => 'Mi bandeja',
+            'url'    => 'solvencias-economicas',
+            'icon'   => 'fas fa-inbox',
+            'active' => ['solvencias-economicas'],
+        ],
+        [
+            'text'   => 'Tablero de trazabilidad',
+            'url'    => 'solvencias-economicas/tablero',
+            'icon'   => 'fas fa-route',
+            'active' => ['solvencias-economicas/tablero*', 'solvencias-economicas/expedientes/*'],
+        ],
+        [
+            'text'   => 'Nueva solvencia',
+            'url'    => 'solvencias-economicas/nueva',
+            'icon'   => 'fas fa-plus-circle',
+            'can'    => 'solvencias-elaborar',
+            'active' => ['solvencias-economicas/nueva'],
+        ],
+        [
+            'text'   => 'Contabilidad y Finanzas',
+            'url'    => 'solvencias-economicas/contabilidad',
+            'icon'   => 'fas fa-money-check-alt',
+            'can'    => 'solvencias-pagar',
+            'active' => ['solvencias-economicas/contabilidad*'],
+        ],
+        [
+            'text'   => 'Personas y flujos',
+            'url'    => 'solvencias-economicas/flujos',
+            'icon'   => 'fas fa-project-diagram',
+            'can'    => 'solvencias_flujo.configurar',
+            'active' => ['solvencias-economicas/flujos*'],
         ],
         [
             'header' => 'MESA DE AYUDA',
