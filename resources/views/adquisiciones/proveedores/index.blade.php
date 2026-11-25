@@ -42,6 +42,17 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
     @endif
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show">
+            <strong><i class="fas fa-exclamation-triangle mr-1"></i> No se guardaron los cambios:</strong>
+            <ul class="mb-0 mt-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
 
     {{-- Filtros --}}
     <div class="card mb-3">
@@ -407,8 +418,8 @@ function editarProveedor(id) {
 }
 
 // Resetear modal al cerrar
-document.getElementById('modal-proveedor')
-    .addEventListener('hidden.bs.modal', function () {
+// Bootstrap 4 dispara sus eventos de modal por jQuery: addEventListener no los recibe
+$('#modal-proveedor').on('hidden.bs.modal', function () {
         const f = document.getElementById('form-proveedor');
         f.action = '{{ route('adquisiciones.proveedores.store') }}';
         document.getElementById('method-proveedor').value = 'POST';

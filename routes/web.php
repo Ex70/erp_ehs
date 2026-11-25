@@ -303,7 +303,11 @@ Route::middleware('auth')->prefix('adquisiciones')->name('adquisiciones.')->grou
         // La ruta específica va antes del resource
         Route::get('proveedores/ranking', [ProveedorController::class, 'ranking'])
             ->name('proveedores.ranking');
-        Route::resource('proveedores', ProveedorController::class)->except(['create', 'edit']);
+        // Laravel singulariza 'proveedores' en inglés como {proveedore}; se fija {proveedor}
+        // para que coincida con Proveedor $proveedor en el controlador (show/update/destroy)
+        Route::resource('proveedores', ProveedorController::class)
+            ->except(['create', 'edit'])
+            ->parameters(['proveedores' => 'proveedor']);
 
         Route::resource('unidades-medida', UnidadMedidaController::class)
             ->except(['create', 'edit', 'show'])
